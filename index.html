@@ -90,9 +90,10 @@
         let allProducts = [];
         let currentCategory = '';
         let selectedItems = [];
-        let autoTaxDiscount = 0; // 固定補助金額
+        let autoTaxDiscount = 0;
 
-        const taxFreeCars = ["SWIFT", "S-Cross 2WD", "SWIFT 2T", "VITARA 4WD", "VITARA 4WD 2T"];
+        // 修正後的關鍵字清單
+        const taxFreeCars = ["SWIFT", "SCROSS 2WD", "SWIFT 2T", "VITARA 4WD", "VITARA 4WD 2T", "JIMNY"];
 
         async function loadData() {
             try {
@@ -159,10 +160,14 @@
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             
-            // 檢查是否包含補助車型
-            const hasTaxFreeCar = selectedItems.some(item => 
-                taxFreeCars.some(car => item.name.toUpperCase().includes(car.toUpperCase()))
-            );
+            // 精準過濾：排除 E-VITARA 並包含 JIMNY 與 SCROSS
+            const hasTaxFreeCar = selectedItems.some(item => {
+                const upperName = item.name.toUpperCase();
+                // 排除含有 E-VITARA 的項目
+                if (upperName.includes("E-VITARA")) return false;
+                // 檢查是否符合清單
+                return taxFreeCars.some(car => upperName.includes(car));
+            });
             
             autoTaxDiscount = hasTaxFreeCar ? 50000 : 0;
             const taxSection = document.getElementById('tax-section');
