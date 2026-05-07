@@ -3,18 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suzuki 線上報價系統</title>
+    <title>SUZUKI 購車選單</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .active-tab { border-bottom: 3px solid #065f46; color: #065f46; font-weight: bold; }
+        /* SUZUKI 官方配色 */
+        :root {
+            --suzuki-red: #E60012;
+            --suzuki-blue: #003399;
+        }
+        .active-tab { border-bottom: 3px solid var(--suzuki-red); color: var(--suzuki-red); font-weight: bold; }
         .hide-scroll::-webkit-scrollbar { display: none; }
+        .btn-suzuki-red { background-color: var(--suzuki-red); color: white; }
+        .btn-suzuki-red:active { background-color: #b3000e; }
+        .text-suzuki-blue { color: var(--suzuki-blue); }
     </style>
 </head>
 <body class="bg-gray-50 pb-24 font-sans text-gray-800">
 
     <header class="bg-white sticky top-0 shadow-sm z-10">
-        <div class="text-center py-4 border-b">
-            <h1 class="text-lg font-bold">新車點餐選擇 - 線上即時報價</h1>
+        <div class="text-center py-4 border-b border-gray-100">
+            <h1 class="text-lg font-black tracking-widest text-gray-900">SUZUKI 購車選單</h1>
         </div>
         <nav id="category-nav" class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b hide-scroll"></nav>
     </header>
@@ -25,21 +33,21 @@
 
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl z-20">
         <div class="flex items-center">
-            <div class="relative bg-green-50 p-2 rounded-lg">
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="relative bg-blue-50 p-2 rounded-lg">
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-suzuki-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
             </div>
             <div class="ml-4">
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Estimated Total</p>
-                <p class="text-xl font-black text-gray-800">$ <span id="total-price">0</span></p>
+                <p class="text-xl font-black text-suzuki-blue">$ <span id="total-price">0</span></p>
             </div>
         </div>
-        <button onclick="toggleModal(true)" class="bg-[#065f46] text-white px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg">查看購車清單</button>
+        <button onclick="toggleModal(true)" class="btn-suzuki-red px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg transition-transform">查看選單內容</button>
     </footer>
 
-    <div id="summary-modal" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center" style="display: none;">
+    <div id="summary-modal" class="fixed inset-0 bg-black/70 z-50 flex items-end justify-center" style="display: none;">
         <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[85vh] flex flex-col overflow-hidden text-sm">
             <div class="flex justify-between items-center mb-4 border-b pb-4">
                 <h2 class="text-xl font-bold text-gray-800">已選擇項目</h2>
@@ -56,10 +64,10 @@
                 
                 <div id="tax-section" class="flex flex-col space-y-1 hidden">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-blue-600">政府舊換新貨物稅補助</span>
-                        <span class="font-bold text-blue-600">- $ 50,000</span>
+                        <span class="font-bold text-suzuki-blue">政府舊換新貨物稅補助</span>
+                        <span class="font-bold text-suzuki-blue">- $ 50,000</span>
                     </div>
-                    <p class="text-[11px] text-blue-500 font-bold text-right leading-tight">
+                    <p class="text-[11px] text-blue-500 font-bold text-right leading-tight italic">
                         * 需先入車款後領牌，三個月內退入車主帳戶
                     </p>
                 </div>
@@ -75,10 +83,10 @@
 
                 <div class="flex justify-between items-center pt-3 border-t border-gray-300">
                     <span class="text-lg font-bold">預估成交總額</span>
-                    <span class="text-2xl font-black text-[#065f46]">$ <span id="final-total">0</span></span>
+                    <span class="text-2xl font-black text-suzuki-blue">$ <span id="final-total">0</span></span>
                 </div>
                 
-                <button onclick="toggleModal(false)" class="w-full bg-[#065f46] text-white py-4 rounded-xl font-bold shadow-md mt-2">確認報價內容</button>
+                <button onclick="toggleModal(false)" class="w-full btn-suzuki-red py-4 rounded-xl font-bold shadow-md mt-2">確認內容</button>
             </div>
         </div>
     </div>
@@ -92,7 +100,6 @@
         let selectedItems = [];
         let autoTaxDiscount = 0;
 
-        // 修正後的關鍵字清單
         const taxFreeCars = ["SWIFT", "SCROSS 2WD", "SWIFT 2T", "VITARA 4WD", "VITARA 4WD 2T", "JIMNY"];
 
         async function loadData() {
@@ -116,7 +123,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold">讀取失敗，請檢查網路</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold">讀取失敗</p>`;
             }
         }
 
@@ -134,14 +141,15 @@
             const filtered = allProducts.filter(p => p.category === cat);
             const list = document.getElementById('product-list');
             list.innerHTML = filtered.map(item => `
-                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col">
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col scale-in">
                     <div class="relative pt-[70%]">
                         <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
+                        ${item.status ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${item.status}</span>` : ''}
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
                         <h3 class="font-bold text-gray-800 text-sm truncate">${item.name}</h3>
-                        <p class="text-[#065f46] font-black my-2">$${item.price.toLocaleString()}</p>
-                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold">加入</button>
+                        <p class="text-suzuki-blue font-black my-2">$${item.price.toLocaleString()}</p>
+                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full btn-suzuki-red text-xs py-2 rounded-lg font-bold">加入</button>
                     </div>
                 </div>
             `).join('');
@@ -160,12 +168,9 @@
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             
-            // 精準過濾：排除 E-VITARA 並包含 JIMNY 與 SCROSS
             const hasTaxFreeCar = selectedItems.some(item => {
                 const upperName = item.name.toUpperCase();
-                // 排除含有 E-VITARA 的項目
                 if (upperName.includes("E-VITARA")) return false;
-                // 檢查是否符合清單
                 return taxFreeCars.some(car => upperName.includes(car));
             });
             
@@ -186,11 +191,11 @@
                 <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
                     <div class="flex-1 pr-2">
                         <p class="font-bold text-gray-800 text-[13px] line-clamp-1">${item.name}</p>
-                        <p class="text-xs text-[#065f46] font-bold">$${item.price.toLocaleString()}</p>
+                        <p class="text-xs text-suzuki-blue font-bold">$${item.price.toLocaleString()}</p>
                     </div>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg">移除</button>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg font-bold">移除</button>
                 </div>
-            `).join('') : '<p class="text-center text-gray-400 py-10">清單中尚無品項</p>';
+            `).join('') : '<p class="text-center text-gray-400 py-10">選單中尚無品項</p>';
             
             calculateFinalTotal();
         }
