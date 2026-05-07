@@ -3,82 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>車型配備快速點餐</title>
+    <title>Suzuki 線上購車清單</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .active-tab { border-bottom: 3px solid #065f46; color: #065f46; font-weight: bold; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-gray-100 pb-24">
+<body class="bg-gray-50 pb-24">
 
     <header class="bg-white sticky top-0 shadow-sm z-10">
         <div class="text-center py-4 border-b">
-            <h1 class="text-lg font-bold">新車線上配置報價</h1>
-            <p class="text-xs text-gray-500">掃碼即選，透明報價</p>
+            <h1 class="text-lg font-bold">新車點餐選擇 - 線上即時報價</h1>
         </div>
-        <nav class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b">
-            <span class="px-4 py-2 active-tab">熱門車型</span>
-            <span class="px-4 py-2 text-gray-500">安全配備</span>
-            <span class="px-4 py-2 text-gray-500">舒適生活</span>
-            <span class="px-4 py-2 text-gray-500">保險規費</span>
+        <nav id="category-nav" class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b hide-scroll">
+            <span class="px-4 py-2 active-tab">全部品項</span>
         </nav>
     </header>
 
-    <main class="p-4 grid grid-cols-2 gap-4">
-        
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div class="relative">
-                <img src="https://via.placeholder.com/200x150?text=Swift+Sport" alt="Swift" class="w-full">
-                <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">NEW</span>
-            </div>
-            <div class="p-3 text-center">
-                <h3 class="font-bold text-sm">Swift Sport</h3>
-                <p class="text-xs text-gray-400 mb-2">極致駕馭感</p>
-                <p class="text-green-700 font-bold">$820,000</p>
-                <button onclick="addToCart('Swift Sport', 820000)" class="mt-2 w-full bg-green-800 text-white text-xs py-2 rounded-lg active:scale-95 transition">加入菜單</button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div class="relative">
-                <img src="https://via.placeholder.com/200x150?text=3M+Film" alt="隔熱紙" class="w-full">
-            </div>
-            <div class="p-3 text-center">
-                <h3 class="font-bold text-sm">3M 全車隔熱紙</h3>
-                <p class="text-xs text-gray-400 mb-2">隔熱防爆首選</p>
-                <p class="text-green-700 font-bold">$18,000</p>
-                <button onclick="addToCart('3M 隔熱紙', 18000)" class="mt-2 w-full bg-green-800 text-white text-xs py-2 rounded-lg active:scale-95 transition">加購</button>
-            </div>
-        </div>
-
+    <main id="product-list" class="p-4 grid grid-cols-2 gap-4">
+        <p class="col-span-2 text-center py-10 text-gray-400">系統連線中...</p>
     </main>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-lg">
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl">
         <div class="flex items-center">
-            <div class="relative">
-                <span class="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full" id="cart-count">0</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="relative bg-green-50 p-2 rounded-lg">
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">0</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
             </div>
             <div class="ml-4">
-                <p class="text-xs text-gray-400">預估總額</p>
-                <p class="text-lg font-bold text-gray-800">$ <span id="total-price">0</span></p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase">Estimated Total</p>
+                <p class="text-xl font-black text-gray-800">$ <span id="total-price">0</span></p>
             </div>
         </div>
-        <button onclick="alert('報價單已存檔，請聯繫業務！')" class="bg-green-800 text-white px-8 py-3 rounded-full font-bold shadow-md">查看購車清單</button>
+        <button onclick="showSummary()" class="bg-[#065f46] text-white px-8 py-3 rounded-xl font-bold active:scale-95 transition-all shadow-lg">查看購車清單</button>
     </footer>
 
     <script>
-        let total = 0;
-        let count = 0;
+        const sheetID = '1-FY0lTyZhZfeMk4VGIjATYbWF16HAck2oLhxi1JD0rw';
+        const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
-        function addToCart(item, price) {
-            total += price;
-            count += 1;
-            document.getElementById('total-price').innerText = total.toLocaleString();
-            document.getElementById('cart-count').innerText = count;
+        let products = [];
+        let total = 0;
+        let selectedItems = [];
+
+        async function loadData() {
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+
+                products = rows.map(row => ({
+                    category: row.c[0]?.v || '其他',
+                    name: row.c[1]?.v || '',
+                    price: row.c[2]?.v || 0,
+                    desc: row.c[3]?.v || '',
+                    img: row.c[4]?.v || 'https://via.placeholder.com/150',
+                    status: row.c[5]?.v || ''
+                }));
+
+                renderProducts(products);
+            } catch (e) {
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">讀取失敗，請確認試算表已「發佈到網路」</p>`;
+            }
         }
+
+        function renderProducts(data) {
+            const list = document.getElementById('product-list');
+            list.innerHTML = data.map(item => `
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col">
+                    <div class="relative pt-[75%]">
+                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
+                        ${item.status ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${item.status}</span>` : ''}
+                    </div>
+                    <div class="p-3 flex-1 flex flex-col justify-between text-center">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm truncate">${item.name}</h3>
+                            <p class="text-[10px] text-gray-400 line-clamp-1 mb-2">${item.desc}</p>
+                        </div>
+                        <div>
+                            <p class="text-[#065f46] font-black mb-2">$${item.price.toLocaleString()}</p>
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-gray-50 text-gray-800 text-xs py-2 rounded-lg font-bold border border-gray-200 active:bg-gray-200">加入清單</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(name, price) {
+            total += price;
+            selectedItems.push(name);
+            document.getElementById('total-price').innerText = total.toLocaleString();
+            document.getElementById('cart-count').innerText = selectedItems.length;
+        }
+
+        function showSummary() {
+            if (selectedItems.length === 0) {
+                alert("清單是空的喔！");
+                return;
+            }
+            alert("您的購車預選清單：\n" + selectedItems.join("\n") + "\n\n總預算約：$" + total.toLocaleString() + "\n\n請將此畫面出示給服務專員。");
+        }
+
+        loadData();
     </script>
 </body>
 </html>
