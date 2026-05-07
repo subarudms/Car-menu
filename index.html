@@ -17,8 +17,7 @@
             <h1 class="text-lg font-bold">新車點餐選擇 - 線上即時報價</h1>
         </div>
         <nav id="category-nav" class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b hide-scroll">
-            <span class="px-4 py-2 active-tab">全部品項</span>
-        </nav>
+            </nav>
     </header>
 
     <main id="product-list" class="p-4 grid grid-cols-2 gap-4">
@@ -45,7 +44,8 @@
         const sheetID = '1-FY0lTyZhZfeMk4VGIjATYbWF16HAck2oLhxi1JD0rw';
         const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
-        let products = [];
+        let allProducts = [];
+        let currentCategory = '車型選擇';
         let total = 0;
         let selectedItems = [];
 
@@ -56,7 +56,7 @@
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 const rows = json.table.rows;
 
-                products = rows.map(row => ({
+                allProducts = rows.map(row => ({
                     category: row.c[0]?.v || '其他',
                     name: row.c[1]?.v || '',
                     price: row.c[2]?.v || 0,
@@ -65,18 +65,31 @@
                     status: row.c[5]?.v || ''
                 }));
 
-                renderProducts(products);
+                renderCategories();
+                filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">讀取失敗，請確認試算表已「發佈到網路」</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">讀取失敗，請確認試算表已發佈</p>`;
             }
         }
 
-        function renderProducts(data) {
+        function renderCategories() {
+            const categories = [...new Set(allProducts.map(p => p.category))];
+            const nav = document.getElementById('category-nav');
+            nav.innerHTML = categories.map(cat => `
+                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer ${cat === currentCategory ? 'active-tab' : 'text-gray-500'}">${cat}</span>
+            `).join('');
+        }
+
+        function filterProducts(cat) {
+            currentCategory = cat;
+            renderCategories(); // 刷新標籤狀態
+            const filtered = allProducts.filter(p => p.category === cat);
+            
             const list = document.getElementById('product-list');
-            list.innerHTML = data.map(item => `
+            list.innerHTML = filtered.map(item => `
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col">
                     <div class="relative pt-[75%]">
-                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
                         ${item.status ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${item.status}</span>` : ''}
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
@@ -86,7 +99,7 @@
                         </div>
                         <div>
                             <p class="text-[#065f46] font-black mb-2">$${item.price.toLocaleString()}</p>
-                            <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-gray-50 text-gray-800 text-xs py-2 rounded-lg font-bold border border-gray-200 active:bg-gray-200">加入清單</button>
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-gray-50 text-gray-800 text-xs py-2 rounded-lg font-bold border border-gray-200">加入清單</button>
                         </div>
                     </div>
                 </div>
@@ -95,7 +108,7 @@
 
         function addToCart(name, price) {
             total += price;
-            selectedItems.push(name);
+            selectedItems.push({name, price});
             document.getElementById('total-price').innerText = total.toLocaleString();
             document.getElementById('cart-count').innerText = selectedItems.length;
         }
@@ -105,7 +118,8 @@
                 alert("清單是空的喔！");
                 return;
             }
-            alert("您的購車預選清單：\n" + selectedItems.join("\n") + "\n\n總預算約：$" + total.toLocaleString() + "\n\n請將此畫面出示給服務專員。");
+            let detail = selectedItems.map(i => `${i.name}: $${i.price.toLocaleString()}`).join("\n");
+            alert("您的購車預選清單：\n\n" + detail + "\n\n---總預算約：$" + total.toLocaleString());
         }
 
         loadData();
