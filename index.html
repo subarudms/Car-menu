@@ -10,7 +10,7 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-gray-50 pb-24 font-sans">
+<body class="bg-gray-50 pb-24 font-sans text-gray-800">
 
     <header class="bg-white sticky top-0 shadow-sm z-10">
         <div class="text-center py-4 border-b">
@@ -51,24 +51,29 @@
             <div class="mt-4 pt-4 border-t space-y-3 bg-gray-50 -mx-6 px-6 pb-6">
                 <div class="flex justify-between items-center text-gray-600">
                     <span>原始車價總計</span>
-                    <span class="font-medium">$ <span id="original-total">0</span></span>
+                    <span class="font-bold">$ <span id="original-total">0</span></span>
                 </div>
                 
-                <div class="flex flex-col space-y-1">
+                <div id="tax-section" class="flex flex-col space-y-1 hidden">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-red-600">貨物稅減徵補助</span>
-                        <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
-                            <span class="text-red-500 mr-1">-</span>
-                            <input type="number" id="discount-input" oninput="calculateFinalTotal()" value="0"
-                                   class="w-24 py-1 text-right focus:outline-none text-red-600 font-bold">
-                        </div>
+                        <span class="font-bold text-blue-600">政府舊換新貨物稅補助</span>
+                        <span class="font-bold text-blue-600">- $ 50,000</span>
                     </div>
-                    <p id="tax-note" class="text-[11px] text-red-500 font-bold hidden text-right">
+                    <p class="text-[11px] text-blue-500 font-bold text-right leading-tight">
                         * 需先入車款後領牌，三個月內退入車主帳戶
                     </p>
                 </div>
 
-                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-red-600">其他折讓/優惠金額</span>
+                    <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
+                        <span class="text-red-500 mr-1">-</span>
+                        <input type="number" id="manual-discount" oninput="calculateFinalTotal()" placeholder="請輸入金額" 
+                               class="w-24 py-1 text-right focus:outline-none text-red-600 font-bold bg-transparent">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-gray-300">
                     <span class="text-lg font-bold">預估成交總額</span>
                     <span class="text-2xl font-black text-[#065f46]">$ <span id="final-total">0</span></span>
                 </div>
@@ -85,8 +90,8 @@
         let allProducts = [];
         let currentCategory = '';
         let selectedItems = [];
+        let autoTaxDiscount = 0; // 固定補助金額
 
-        // 需要自動帶入 50000 的關鍵字清單
         const taxFreeCars = ["SWIFT", "S-Cross 2WD", "SWIFT 2T", "VITARA 4WD", "VITARA 4WD 2T"];
 
         async function loadData() {
@@ -110,7 +115,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">連線失敗</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold">讀取失敗，請檢查網路</p>`;
             }
         }
 
@@ -135,7 +140,7 @@
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
                         <h3 class="font-bold text-gray-800 text-sm truncate">${item.name}</h3>
                         <p class="text-[#065f46] font-black my-2">$${item.price.toLocaleString()}</p>
-                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold">加入清單</button>
+                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold">加入</button>
                     </div>
                 </div>
             `).join('');
@@ -143,36 +148,30 @@
 
         function addToCart(name, price) {
             selectedItems.push({ id: Date.now(), name, price });
-            checkTaxDiscount(); // 檢查是否需要自動填入 50000
             updateCartUI();
         }
 
         function removeFromCart(id) {
             selectedItems = selectedItems.filter(item => item.id !== id);
-            checkTaxDiscount(); 
             updateCartUI();
-        }
-
-        function checkTaxDiscount() {
-            // 只要清單中有一台符合關鍵字的車，就帶入 50000
-            const hasTaxFreeCar = selectedItems.some(item => 
-                taxFreeCars.some(car => item.name.toUpperCase().includes(car.toUpperCase()))
-            );
-            
-            const discountInput = document.getElementById('discount-input');
-            const taxNote = document.getElementById('tax-note');
-            
-            if (hasTaxFreeCar) {
-                discountInput.value = 50000;
-                taxNote.classList.remove('hidden');
-            } else {
-                discountInput.value = 0;
-                taxNote.classList.add('hidden');
-            }
         }
 
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            
+            // 檢查是否包含補助車型
+            const hasTaxFreeCar = selectedItems.some(item => 
+                taxFreeCars.some(car => item.name.toUpperCase().includes(car.toUpperCase()))
+            );
+            
+            autoTaxDiscount = hasTaxFreeCar ? 50000 : 0;
+            const taxSection = document.getElementById('tax-section');
+            if(autoTaxDiscount > 0) {
+                taxSection.classList.remove('hidden');
+            } else {
+                taxSection.classList.add('hidden');
+            }
+
             document.getElementById('total-price').innerText = baseTotal.toLocaleString();
             document.getElementById('original-total').innerText = baseTotal.toLocaleString();
             document.getElementById('cart-count').innerText = selectedItems.length;
@@ -180,21 +179,21 @@
             const cartList = document.getElementById('cart-items-list');
             cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
                 <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
-                    <div>
-                        <p class="font-bold text-gray-800 text-[13px]">${item.name}</p>
+                    <div class="flex-1 pr-2">
+                        <p class="font-bold text-gray-800 text-[13px] line-clamp-1">${item.name}</p>
                         <p class="text-xs text-[#065f46] font-bold">$${item.price.toLocaleString()}</p>
                     </div>
                     <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg">移除</button>
                 </div>
-            `).join('') : '<p class="text-center text-gray-400 py-4">清單尚未加入車款</p>';
+            `).join('') : '<p class="text-center text-gray-400 py-10">清單中尚無品項</p>';
             
             calculateFinalTotal();
         }
 
         function calculateFinalTotal() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            const discount = parseInt(document.getElementById('discount-input').value) || 0;
-            const finalTotal = baseTotal - discount;
+            const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
+            const finalTotal = baseTotal - autoTaxDiscount - manualDiscount;
             document.getElementById('final-total').innerText = finalTotal.toLocaleString();
         }
 
