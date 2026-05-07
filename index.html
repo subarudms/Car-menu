@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suzuki 線上購車清單</title>
+    <title>Suzuki 線上報價系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .active-tab { border-bottom: 3px solid #065f46; color: #065f46; font-weight: bold; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        /* 簡單的彈窗樣式 */
-        #summary-modal { display: none; }
     </style>
 </head>
-<body class="bg-gray-50 pb-24">
+<body class="bg-gray-50 pb-24 font-sans">
 
     <header class="bg-white sticky top-0 shadow-sm z-10">
         <div class="text-center py-4 border-b">
@@ -25,36 +23,53 @@
         <p class="col-span-2 text-center py-10 text-gray-400">系統連線中...</p>
     </main>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl">
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl z-20">
         <div class="flex items-center">
             <div class="relative bg-green-50 p-2 rounded-lg">
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">0</span>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
             </div>
             <div class="ml-4">
-                <p class="text-[10px] text-gray-400 font-bold uppercase">Estimated Total</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Estimated Total</p>
                 <p class="text-xl font-black text-gray-800">$ <span id="total-price">0</span></p>
             </div>
         </div>
-        <button onclick="toggleModal(true)" class="bg-[#065f46] text-white px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg">查看購車清單</button>
+        <button onclick="toggleModal(true)" class="bg-[#065f46] text-white px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg transition-transform">查看購車清單</button>
     </footer>
 
-    <div id="summary-modal" class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
-        <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
+    <div id="summary-modal" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center" style="display: none;">
+        <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
                 <h2 class="text-xl font-bold text-gray-800">已選擇項目</h2>
-                <button onclick="toggleModal(false)" class="text-gray-400 text-2xl">&times;</button>
+                <button onclick="toggleModal(false)" class="text-gray-400 text-3xl leading-none">&times;</button>
             </div>
-            <div id="cart-items-list" class="space-y-4">
+            
+            <div id="cart-items-list" class="flex-1 overflow-y-auto space-y-4 pr-1">
                 </div>
-            <div class="mt-6 pt-4 border-t">
-                <div class="flex justify-between text-lg font-bold mb-6">
-                    <span>總計金額</span>
-                    <span class="text-[#065f46]">$ <span id="modal-total">0</span></span>
+
+            <div class="mt-4 pt-4 border-t space-y-3 bg-gray-50 -mx-6 px-6 pb-6">
+                <div class="flex justify-between items-center text-gray-600">
+                    <span class="text-sm">原始總計</span>
+                    <span class="font-medium">$ <span id="original-total">0</span></span>
                 </div>
-                <button onclick="toggleModal(false)" class="w-full bg-[#065f46] text-white py-4 rounded-xl font-bold">返回繼續點選</button>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold text-red-600">活動折扣/折讓</span>
+                    <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
+                        <span class="text-red-500 mr-1">-</span>
+                        <input type="number" id="discount-input" oninput="calculateFinalTotal()" placeholder="輸入金額" 
+                               class="w-24 py-1 text-right focus:outline-none text-red-600 font-bold text-sm">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                    <span class="text-lg font-bold">最終成交價</span>
+                    <span class="text-2xl font-black text-[#065f46]">$ <span id="final-total">0</span></span>
+                </div>
+                
+                <button onclick="toggleModal(false)" class="w-full bg-[#065f46] text-white py-4 rounded-xl font-bold shadow-md mt-2">確認並返回</button>
             </div>
         </div>
     </div>
@@ -65,7 +80,6 @@
 
         let allProducts = [];
         let currentCategory = '';
-        let total = 0;
         let selectedItems = [];
 
         async function loadData() {
@@ -85,11 +99,11 @@
                 }));
 
                 const categories = [...new Set(allProducts.map(p => p.category))];
-                currentCategory = categories[0]; // 預設選第一個分類
+                currentCategory = categories[0];
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">讀取失敗</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">連線失敗，請檢查網路</p>`;
             }
         }
 
@@ -97,7 +111,7 @@
             const categories = [...new Set(allProducts.map(p => p.category))];
             const nav = document.getElementById('category-nav');
             nav.innerHTML = categories.map(cat => `
-                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer ${cat === currentCategory ? 'active-tab' : 'text-gray-500'}">${cat}</span>
+                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer ${cat === currentCategory ? 'active-tab' : 'text-gray-500'} transition-all">${cat}</span>
             `).join('');
         }
 
@@ -107,14 +121,15 @@
             const filtered = allProducts.filter(p => p.category === cat);
             const list = document.getElementById('product-list');
             list.innerHTML = filtered.map(item => `
-                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col scale-in">
-                    <div class="relative pt-[75%]">
-                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col">
+                    <div class="relative pt-[70%]">
+                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=Suzuki'">
+                        ${item.status ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${item.status}</span>` : ''}
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
                         <h3 class="font-bold text-gray-800 text-sm truncate">${item.name}</h3>
                         <p class="text-[#065f46] font-black my-2">$${item.price.toLocaleString()}</p>
-                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold">加入</button>
+                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold active:bg-green-900 transition-colors">加入</button>
                     </div>
                 </div>
             `).join('');
@@ -122,34 +137,45 @@
 
         function addToCart(name, price) {
             selectedItems.push({ id: Date.now(), name, price });
-            updateCart();
+            updateCartUI();
         }
 
         function removeFromCart(id) {
             selectedItems = selectedItems.filter(item => item.id !== id);
-            updateCart();
+            updateCartUI();
         }
 
-        function updateCart() {
-            total = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            document.getElementById('total-price').innerText = total.toLocaleString();
-            document.getElementById('modal-total').innerText = total.toLocaleString();
+        function updateCartUI() {
+            const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('total-price').innerText = baseTotal.toLocaleString();
+            document.getElementById('original-total').innerText = baseTotal.toLocaleString();
             document.getElementById('cart-count').innerText = selectedItems.length;
             
             const cartList = document.getElementById('cart-items-list');
-            cartList.innerHTML = selectedItems.map(item => `
-                <div class="flex justify-between items-center">
+            cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
                     <div>
-                        <p class="font-bold text-gray-800">${item.name}</p>
-                        <p class="text-sm text-green-700">$${item.price.toLocaleString()}</p>
+                        <p class="font-bold text-gray-800 text-sm">${item.name}</p>
+                        <p class="text-xs text-green-700 font-bold">$${item.price.toLocaleString()}</p>
                     </div>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-xs border border-red-200 px-3 py-1 rounded-full font-bold">取消</button>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-200 px-3 py-1 rounded-lg font-bold hover:bg-red-50 transition-colors">移除</button>
                 </div>
-            `).join('');
+            `).join('') : '<p class="text-center text-gray-400 py-4">尚未選擇任何品項</p>';
+            
+            calculateFinalTotal();
+        }
+
+        function calculateFinalTotal() {
+            const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            const discount = parseInt(document.getElementById('discount-input').value) || 0;
+            const finalTotal = baseTotal - discount;
+            document.getElementById('final-total').innerText = finalTotal.toLocaleString();
         }
 
         function toggleModal(show) {
-            document.getElementById('summary-modal').style.display = show ? 'flex' : 'none';
+            const modal = document.getElementById('summary-modal');
+            modal.style.display = show ? 'flex' : 'none';
+            if(show) updateCartUI();
         }
 
         loadData();
