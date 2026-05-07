@@ -36,40 +36,44 @@
                 <p class="text-xl font-black text-gray-800">$ <span id="total-price">0</span></p>
             </div>
         </div>
-        <button onclick="toggleModal(true)" class="bg-[#065f46] text-white px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg transition-transform">查看購車清單</button>
+        <button onclick="toggleModal(true)" class="bg-[#065f46] text-white px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg">查看購車清單</button>
     </footer>
 
     <div id="summary-modal" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center" style="display: none;">
-        <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[85vh] flex flex-col overflow-hidden text-sm">
             <div class="flex justify-between items-center mb-4 border-b pb-4">
                 <h2 class="text-xl font-bold text-gray-800">已選擇項目</h2>
                 <button onclick="toggleModal(false)" class="text-gray-400 text-3xl leading-none">&times;</button>
             </div>
             
-            <div id="cart-items-list" class="flex-1 overflow-y-auto space-y-4 pr-1">
-                </div>
+            <div id="cart-items-list" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
 
             <div class="mt-4 pt-4 border-t space-y-3 bg-gray-50 -mx-6 px-6 pb-6">
                 <div class="flex justify-between items-center text-gray-600">
-                    <span class="text-sm">原始總計</span>
+                    <span>原始車價總計</span>
                     <span class="font-medium">$ <span id="original-total">0</span></span>
                 </div>
                 
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-bold text-red-600">活動折扣/折讓</span>
-                    <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
-                        <span class="text-red-500 mr-1">-</span>
-                        <input type="number" id="discount-input" oninput="calculateFinalTotal()" placeholder="輸入金額" 
-                               class="w-24 py-1 text-right focus:outline-none text-red-600 font-bold text-sm">
+                <div class="flex flex-col space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-red-600">貨物稅減徵補助</span>
+                        <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
+                            <span class="text-red-500 mr-1">-</span>
+                            <input type="number" id="discount-input" oninput="calculateFinalTotal()" value="0"
+                                   class="w-24 py-1 text-right focus:outline-none text-red-600 font-bold">
+                        </div>
                     </div>
+                    <p id="tax-note" class="text-[11px] text-red-500 font-bold hidden text-right">
+                        * 需先入車款後領牌，三個月內退入車主帳戶
+                    </p>
                 </div>
 
                 <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                    <span class="text-lg font-bold">最終成交價</span>
+                    <span class="text-lg font-bold">預估成交總額</span>
                     <span class="text-2xl font-black text-[#065f46]">$ <span id="final-total">0</span></span>
                 </div>
                 
-                <button onclick="toggleModal(false)" class="w-full bg-[#065f46] text-white py-4 rounded-xl font-bold shadow-md mt-2">確認並返回</button>
+                <button onclick="toggleModal(false)" class="w-full bg-[#065f46] text-white py-4 rounded-xl font-bold shadow-md mt-2">確認報價內容</button>
             </div>
         </div>
     </div>
@@ -81,6 +85,9 @@
         let allProducts = [];
         let currentCategory = '';
         let selectedItems = [];
+
+        // 需要自動帶入 50000 的關鍵字清單
+        const taxFreeCars = ["SWIFT", "S-Cross 2WD", "SWIFT 2T", "VITARA 4WD", "VITARA 4WD 2T"];
 
         async function loadData() {
             try {
@@ -103,7 +110,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">連線失敗，請檢查網路</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500">連線失敗</p>`;
             }
         }
 
@@ -111,7 +118,7 @@
             const categories = [...new Set(allProducts.map(p => p.category))];
             const nav = document.getElementById('category-nav');
             nav.innerHTML = categories.map(cat => `
-                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer ${cat === currentCategory ? 'active-tab' : 'text-gray-500'} transition-all">${cat}</span>
+                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer ${cat === currentCategory ? 'active-tab' : 'text-gray-500'}">${cat}</span>
             `).join('');
         }
 
@@ -123,13 +130,12 @@
             list.innerHTML = filtered.map(item => `
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col">
                     <div class="relative pt-[70%]">
-                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=Suzuki'">
-                        ${item.status ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${item.status}</span>` : ''}
+                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
                         <h3 class="font-bold text-gray-800 text-sm truncate">${item.name}</h3>
                         <p class="text-[#065f46] font-black my-2">$${item.price.toLocaleString()}</p>
-                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold active:bg-green-900 transition-colors">加入</button>
+                        <button onclick="addToCart('${item.name}', ${item.price})" class="w-full bg-[#065f46] text-white text-xs py-2 rounded-lg font-bold">加入清單</button>
                     </div>
                 </div>
             `).join('');
@@ -137,12 +143,32 @@
 
         function addToCart(name, price) {
             selectedItems.push({ id: Date.now(), name, price });
+            checkTaxDiscount(); // 檢查是否需要自動填入 50000
             updateCartUI();
         }
 
         function removeFromCart(id) {
             selectedItems = selectedItems.filter(item => item.id !== id);
+            checkTaxDiscount(); 
             updateCartUI();
+        }
+
+        function checkTaxDiscount() {
+            // 只要清單中有一台符合關鍵字的車，就帶入 50000
+            const hasTaxFreeCar = selectedItems.some(item => 
+                taxFreeCars.some(car => item.name.toUpperCase().includes(car.toUpperCase()))
+            );
+            
+            const discountInput = document.getElementById('discount-input');
+            const taxNote = document.getElementById('tax-note');
+            
+            if (hasTaxFreeCar) {
+                discountInput.value = 50000;
+                taxNote.classList.remove('hidden');
+            } else {
+                discountInput.value = 0;
+                taxNote.classList.add('hidden');
+            }
         }
 
         function updateCartUI() {
@@ -153,14 +179,14 @@
             
             const cartList = document.getElementById('cart-items-list');
             cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
                     <div>
-                        <p class="font-bold text-gray-800 text-sm">${item.name}</p>
-                        <p class="text-xs text-green-700 font-bold">$${item.price.toLocaleString()}</p>
+                        <p class="font-bold text-gray-800 text-[13px]">${item.name}</p>
+                        <p class="text-xs text-[#065f46] font-bold">$${item.price.toLocaleString()}</p>
                     </div>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-200 px-3 py-1 rounded-lg font-bold hover:bg-red-50 transition-colors">移除</button>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg">移除</button>
                 </div>
-            `).join('') : '<p class="text-center text-gray-400 py-4">尚未選擇任何品項</p>';
+            `).join('') : '<p class="text-center text-gray-400 py-4">清單尚未加入車款</p>';
             
             calculateFinalTotal();
         }
@@ -173,8 +199,7 @@
         }
 
         function toggleModal(show) {
-            const modal = document.getElementById('summary-modal');
-            modal.style.display = show ? 'flex' : 'none';
+            document.getElementById('summary-modal').style.display = show ? 'flex' : 'none';
             if(show) updateCartUI();
         }
 
