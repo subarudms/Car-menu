@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>車型配備快速點餐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-tab { border-bottom: 3px solid #065f46; color: #065f46; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-100 pb-24">
+
+    <header class="bg-white sticky top-0 shadow-sm z-10">
+        <div class="text-center py-4 border-b">
+            <h1 class="text-lg font-bold">新車線上配置報價</h1>
+            <p class="text-xs text-gray-500">掃碼即選，透明報價</p>
+        </div>
+        <nav class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b">
+            <span class="px-4 py-2 active-tab">熱門車型</span>
+            <span class="px-4 py-2 text-gray-500">安全配備</span>
+            <span class="px-4 py-2 text-gray-500">舒適生活</span>
+            <span class="px-4 py-2 text-gray-500">保險規費</span>
+        </nav>
+    </header>
+
+    <main class="p-4 grid grid-cols-2 gap-4">
+        
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <div class="relative">
+                <img src="https://via.placeholder.com/200x150?text=Swift+Sport" alt="Swift" class="w-full">
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">NEW</span>
+            </div>
+            <div class="p-3 text-center">
+                <h3 class="font-bold text-sm">Swift Sport</h3>
+                <p class="text-xs text-gray-400 mb-2">極致駕馭感</p>
+                <p class="text-green-700 font-bold">$820,000</p>
+                <button onclick="addToCart('Swift Sport', 820000)" class="mt-2 w-full bg-green-800 text-white text-xs py-2 rounded-lg active:scale-95 transition">加入菜單</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <div class="relative">
+                <img src="https://via.placeholder.com/200x150?text=3M+Film" alt="隔熱紙" class="w-full">
+            </div>
+            <div class="p-3 text-center">
+                <h3 class="font-bold text-sm">3M 全車隔熱紙</h3>
+                <p class="text-xs text-gray-400 mb-2">隔熱防爆首選</p>
+                <p class="text-green-700 font-bold">$18,000</p>
+                <button onclick="addToCart('3M 隔熱紙', 18000)" class="mt-2 w-full bg-green-800 text-white text-xs py-2 rounded-lg active:scale-95 transition">加購</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-lg">
+        <div class="flex items-center">
+            <div class="relative">
+                <span class="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full" id="cart-count">0</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-xs text-gray-400">預估總額</p>
+                <p class="text-lg font-bold text-gray-800">$ <span id="total-price">0</span></p>
+            </div>
+        </div>
+        <button onclick="alert('報價單已存檔，請聯繫業務！')" class="bg-green-800 text-white px-8 py-3 rounded-full font-bold shadow-md">查看購車清單</button>
+    </footer>
+
+    <script>
+        let total = 0;
+        let count = 0;
+
+        function addToCart(item, price) {
+            total += price;
+            count += 1;
+            document.getElementById('total-price').innerText = total.toLocaleString();
+            document.getElementById('cart-count').innerText = count;
+        }
+    </script>
+</body>
+</html>
