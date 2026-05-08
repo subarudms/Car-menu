@@ -13,13 +13,11 @@
         .active-tab { border-bottom: 3px solid var(--suzuki-red); color: var(--suzuki-red); font-weight: bold; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* --- 強制點擊縮放回饋 --- */
         .btn-feedback {
             transition: transform 0.1s ease-out !important;
             -webkit-tap-highlight-color: transparent !important;
             user-select: none;
         }
-        /* 只要點擊，不論是按鈕還是標籤都強制縮放 10% */
         .btn-feedback:active {
             transform: scale(0.9) !important;
             opacity: 0.8 !important;
@@ -27,7 +25,6 @@
 
         .btn-suzuki-red { background-color: var(--suzuki-red); color: white; }
         
-        /* 購物車彈跳動畫 */
         @keyframes bounce {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.3); }
@@ -78,13 +75,15 @@
                     <span>原始車價總計</span>
                     <span>$ <span id="original-total">0</span></span>
                 </div>
+                
                 <div id="tax-section" class="flex flex-col space-y-1 hidden">
                     <div class="flex justify-between items-center text-[#003399] font-bold">
-                        <span>新購車貨物稅補助</span>
-                        <span>- $ 50,000</span>
+                        <span>新購車貨物稅補助 <span id="tax-car-count"></span></span>
+                        <span>- $ <span id="tax-total-display">0</span></span>
                     </div>
                     <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight">* 需先入車款後由公司三個月內退至車主帳戶</p>
                 </div>
+
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-red-600">其他折讓/優惠金額</span>
                     <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
@@ -120,8 +119,8 @@
                     </div>
                     <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden">
                         <div class="flex justify-between text-[#003399] font-bold">
-                            <span>新購車貨物稅補助</span>
-                            <span>- $ 50,000</span>
+                            <span>新購車貨物稅補助 <span id="receipt-tax-count"></span></span>
+                            <span id="receipt-tax-total"></span>
                         </div>
                         <p class="text-[9px] text-blue-400 text-right font-medium italic">* 需先入車款後由公司三個月內退至車主帳戶</p>
                     </div>
@@ -150,6 +149,7 @@
         let currentCategory = '';
         let selectedItems = [];
         let autoTaxDiscount = 0;
+        let carCount = 0;
 
         const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY"];
 
@@ -171,7 +171,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold py-10">資料載入失敗，請確認網路連線</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold py-10">資料載入失敗</p>`;
             }
         }
 
@@ -224,18 +224,30 @@
 
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            const hasTaxFreeCar = selectedItems.some(item => {
+            
+            // --- 修正點：累計符合補助條件的台數 ---
+            const targetCars = selectedItems.filter(item => {
                 const upperName = item.name.toUpperCase();
                 if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false;
                 return taxFreeCars.some(car => upperName.includes(car));
             });
-            autoTaxDiscount = hasTaxFreeCar ? 50000 : 0;
+            
+            carCount = targetCars.length;
+            autoTaxDiscount = carCount * 50000;
+
             const taxSection = document.getElementById('tax-section');
-            if(autoTaxDiscount > 0) taxSection.classList.remove('hidden');
-            else taxSection.classList.add('hidden');
+            if(autoTaxDiscount > 0) {
+                taxSection.classList.remove('hidden');
+                document.getElementById('tax-total-display').innerText = autoTaxDiscount.toLocaleString();
+                document.getElementById('tax-car-count').innerText = carCount > 1 ? `(共 ${carCount} 台)` : "";
+            } else {
+                taxSection.classList.add('hidden');
+            }
+
             document.getElementById('total-price').innerText = baseTotal.toLocaleString();
             document.getElementById('original-total').innerText = baseTotal.toLocaleString();
             document.getElementById('cart-count').innerText = selectedItems.length;
+            
             const cartList = document.getElementById('cart-items-list');
             cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
                 <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
@@ -271,9 +283,17 @@
                 </div>
             `).join('');
             document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
+            
+            // 報價單累計顯示
             const taxRow = document.getElementById('receipt-tax-row');
-            if(autoTaxDiscount > 0) taxRow.classList.remove('hidden');
-            else taxRow.classList.add('hidden');
+            if(autoTaxDiscount > 0) {
+                taxRow.classList.remove('hidden');
+                document.getElementById('receipt-tax-count').innerText = carCount > 1 ? `(共 ${carCount} 台)` : "";
+                document.getElementById('receipt-tax-total').innerText = `- $ ${autoTaxDiscount.toLocaleString()}`;
+            } else {
+                taxRow.classList.add('hidden');
+            }
+
             const discountRow = document.getElementById('receipt-discount-row');
             if(totals.manualDiscount > 0) {
                 discountRow.classList.remove('hidden');
