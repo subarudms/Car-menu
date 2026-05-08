@@ -15,36 +15,39 @@
         .btn-suzuki-red { background-color: var(--suzuki-red); color: white; }
         .btn-suzuki-red:active { background-color: #b3000e; }
         .text-suzuki-blue { color: var(--suzuki-blue); }
+        .receipt-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="bg-gray-50 pb-24 font-sans text-gray-800">
 
-    <header class="bg-white sticky top-0 shadow-sm z-10">
-        <div class="text-center py-4 border-b border-gray-100">
-            <h1 class="text-lg font-black tracking-widest text-gray-900">SUZUKI 購車選單</h1>
-        </div>
-        <nav id="category-nav" class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b hide-scroll"></nav>
-    </header>
-
-    <main id="product-list" class="p-4 grid grid-cols-2 gap-4 items-start">
-        <p class="col-span-2 text-center py-10 text-gray-400">連線中...</p>
-    </main>
-
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl z-20">
-        <div class="flex items-center">
-            <div class="relative bg-blue-50 p-2 rounded-lg">
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-[#E60012] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#003399]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
+    <div id="main-app">
+        <header class="bg-white sticky top-0 shadow-sm z-10">
+            <div class="text-center py-4 border-b border-gray-100">
+                <h1 class="text-lg font-black tracking-widest text-gray-900">SUZUKI 購車選單</h1>
             </div>
-            <div class="ml-4">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Estimated Total</p>
-                <p class="text-xl font-black text-[#003399]">$ <span id="total-price">0</span></p>
+            <nav id="category-nav" class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white border-b hide-scroll"></nav>
+        </header>
+
+        <main id="product-list" class="p-4 grid grid-cols-2 gap-4 items-start">
+            <p class="col-span-2 text-center py-10 text-gray-400">連線中...</p>
+        </main>
+
+        <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl z-20">
+            <div class="flex items-center">
+                <div class="relative bg-blue-50 p-2 rounded-lg">
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-[#E60012] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#003399]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Estimated Total</p>
+                    <p class="text-xl font-black text-[#003399]">$ <span id="total-price">0</span></p>
+                </div>
             </div>
-        </div>
-        <button onclick="toggleModal(true)" class="btn-suzuki-red px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg">查看選單內容</button>
-    </footer>
+            <button onclick="toggleModal(true)" class="btn-suzuki-red px-8 py-3 rounded-xl font-bold active:scale-95 shadow-lg">查看內容</button>
+        </footer>
+    </div>
 
     <div id="summary-modal" class="fixed inset-0 bg-black/70 z-50 flex items-end justify-center" style="display: none;">
         <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[85vh] flex flex-col overflow-hidden text-sm">
@@ -63,7 +66,6 @@
                         <span>政府舊換新貨物稅補助</span>
                         <span>- $ 50,000</span>
                     </div>
-                    <p class="text-[11px] text-blue-500 font-bold text-right leading-tight italic">* 需先入車款後領牌，三個月內退入車主帳戶</p>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-red-600">其他折讓/優惠金額</span>
@@ -76,9 +78,58 @@
                     <span class="text-lg font-bold">預估成交總額</span>
                     <span class="text-2xl font-black text-[#003399]">$ <span id="final-total">0</span></span>
                 </div>
-                <button onclick="toggleModal(false)" class="w-full btn-suzuki-red py-4 rounded-xl font-bold shadow-md mt-2">確認報價內容</button>
+                <button onclick="generateReceipt()" class="w-full btn-suzuki-red py-4 rounded-xl font-bold shadow-md mt-2 italic">生成報價明細單 (截圖用)</button>
             </div>
         </div>
+    </div>
+
+    <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-6">
+        <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-2xl overflow-hidden bg-white">
+            <div class="bg-[#003399] text-white p-6 text-center">
+                <h2 class="text-2xl font-black tracking-widest">SUZUKI</h2>
+                <p class="text-sm opacity-80 mt-1">預選購車報價明細單</p>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between text-[10px] text-gray-400 mb-6 border-b pb-2">
+                    <span>報價日期：<span id="receipt-date"></span></span>
+                    <span>僅供預算評估參考</span>
+                </div>
+                
+                <div id="receipt-items" class="space-y-4 mb-8">
+                    </div>
+
+                <div class="border-t-2 border-dashed border-gray-200 pt-6 space-y-3">
+                    <div class="flex justify-between text-gray-500">
+                        <span>原始總價</span>
+                        <span id="receipt-original"></span>
+                    </div>
+                    <div id="receipt-tax-row" class="flex justify-between text-[#003399] font-bold hidden">
+                        <span>政府舊換新補助</span>
+                        <span>- $ 50,000</span>
+                    </div>
+                    <div id="receipt-discount-row" class="flex justify-between text-red-600 font-bold hidden">
+                        <span>其他優惠折讓</span>
+                        <span id="receipt-discount"></span>
+                    </div>
+                    <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                        <span class="text-lg font-bold text-gray-900">預估成交金額</span>
+                        <span class="text-3xl font-black text-[#003399]" id="receipt-final"></span>
+                    </div>
+                </div>
+
+                <div class="mt-10 text-center">
+                    <p class="text-[10px] text-gray-300 leading-relaxed">
+                        本報價僅供購車預算參考，實際交易價格與優惠內容<br>請以現場與銷售顧問簽訂之訂購合約為準。
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-md mx-auto mt-8 px-4 flex gap-3">
+            <button onclick="closeReceipt()" class="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl font-bold">返回選單</button>
+            <button onclick="window.print()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold">儲存或列印</button>
+        </div>
+        <p class="text-center text-gray-400 text-xs mt-4">提示：您可以直接截圖此畫面傳送給客戶</p>
     </div>
 
     <script>
@@ -98,16 +149,13 @@
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 const rows = json.table.rows;
-
                 allProducts = rows.map(row => ({
                     category: row.c[0]?.v || '其他',
                     name: row.c[1]?.v || '',
                     price: row.c[2]?.v || 0,
                     desc: row.c[3]?.v || '',
-                    img: row.c[4]?.v || 'https://via.placeholder.com/150',
-                    status: row.c[5]?.v || ''
+                    img: row.c[4]?.v || 'https://via.placeholder.com/150'
                 }));
-
                 const categories = [...new Set(allProducts.map(p => p.category))];
                 currentCategory = categories[0];
                 renderCategories();
@@ -134,7 +182,6 @@
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col h-full">
                     <div class="relative pt-[70%]">
                         <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
-                        ${item.status ? `<span class="absolute top-2 left-2 bg-[#003399] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${item.status}</span>` : ''}
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
                         <div>
@@ -164,7 +211,6 @@
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             const hasTaxFreeCar = selectedItems.some(item => {
                 const upperName = item.name.toUpperCase();
-                if (upperName.includes("E-VITARA")) return false;
                 return taxFreeCars.some(car => upperName.includes(car));
             });
             autoTaxDiscount = hasTaxFreeCar ? 50000 : 0;
@@ -192,6 +238,50 @@
             const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
             const finalTotal = baseTotal - autoTaxDiscount - manualDiscount;
             document.getElementById('final-total').innerText = finalTotal.toLocaleString();
+            return { baseTotal, manualDiscount, finalTotal };
+        }
+
+        function generateReceipt() {
+            if (selectedItems.length === 0) return alert("請先選擇車型或配件");
+            
+            const totals = calculateFinalTotal();
+            const now = new Date();
+            document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+            
+            const receiptItems = document.getElementById('receipt-items');
+            receiptItems.innerHTML = selectedItems.map(item => `
+                <div class="flex justify-between items-start">
+                    <span class="text-[13px] font-bold text-gray-700 flex-1 pr-4">${item.name}</span>
+                    <span class="text-[13px] text-gray-900 font-medium">$${item.price.toLocaleString()}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
+            
+            const taxRow = document.getElementById('receipt-tax-row');
+            if(autoTaxDiscount > 0) taxRow.classList.remove('hidden');
+            else taxRow.classList.add('hidden');
+
+            const discountRow = document.getElementById('receipt-discount-row');
+            if(totals.manualDiscount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+
+            document.getElementById('receipt-final').innerText = `$ ${totals.finalTotal.toLocaleString()}`;
+            
+            // 切換畫面
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('summary-modal').style.display = 'none';
+            document.getElementById('receipt-view').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function closeReceipt() {
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('receipt-view').classList.add('hidden');
         }
 
         function toggleModal(show) {
