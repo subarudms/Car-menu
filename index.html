@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SUZUKI 購車選單</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -13,14 +13,16 @@
         .active-tab { border-bottom: 3px solid var(--suzuki-red); color: var(--suzuki-red); font-weight: bold; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* 強化的動態縮放回饋 */
-        .click-feedback {
-            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍框 */
+        /* --- 強制點擊縮放回饋 --- */
+        .btn-feedback {
+            transition: transform 0.1s ease-out !important;
+            -webkit-tap-highlight-color: transparent !important;
+            user-select: none;
         }
-        .click-feedback:active {
+        /* 只要點擊，不論是按鈕還是標籤都強制縮放 10% */
+        .btn-feedback:active {
             transform: scale(0.9) !important;
-            opacity: 0.8;
+            opacity: 0.8 !important;
         }
 
         .btn-suzuki-red { background-color: var(--suzuki-red); color: white; }
@@ -44,7 +46,7 @@
         </header>
 
         <main id="product-list" class="p-4 grid grid-cols-2 gap-4 items-start">
-            <p class="col-span-2 text-center py-10 text-gray-400 italic">連線載入中...</p>
+            <p class="col-span-2 text-center py-10 text-gray-400 italic font-bold">載入 SUZUKI 資料中...</p>
         </main>
 
         <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-2xl z-20">
@@ -60,7 +62,7 @@
                     <p class="text-xl font-black text-[#003399]">$ <span id="total-price">0</span></p>
                 </div>
             </div>
-            <button onclick="toggleModal(true)" class="btn-suzuki-red click-feedback px-8 py-3 rounded-xl font-bold shadow-lg">查看內容</button>
+            <button onclick="toggleModal(true)" class="btn-suzuki-red btn-feedback px-8 py-3 rounded-xl font-bold shadow-lg">查看內容</button>
         </footer>
     </div>
 
@@ -72,9 +74,9 @@
             </div>
             <div id="cart-items-list" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
             <div class="mt-4 pt-4 border-t space-y-3 bg-gray-50 -mx-6 px-6 pb-6">
-                <div class="flex justify-between items-center text-gray-600">
+                <div class="flex justify-between items-center text-gray-600 font-bold">
                     <span>原始車價總計</span>
-                    <span class="font-bold">$ <span id="original-total">0</span></span>
+                    <span>$ <span id="original-total">0</span></span>
                 </div>
                 <div id="tax-section" class="flex flex-col space-y-1 hidden">
                     <div class="flex justify-between items-center text-[#003399] font-bold">
@@ -91,10 +93,10 @@
                     </div>
                 </div>
                 <div class="flex justify-between items-center pt-3 border-t border-gray-300">
-                    <span class="text-lg font-bold">預估成交總額</span>
+                    <span class="text-lg font-bold text-gray-900">預估成交總額</span>
                     <span class="text-2xl font-black text-[#003399]">$ <span id="final-total">0</span></span>
                 </div>
-                <button onclick="generateReceipt()" class="w-full btn-suzuki-red click-feedback py-4 rounded-xl font-bold shadow-md mt-2 italic">生成報價明細單 (截圖用)</button>
+                <button onclick="generateReceipt()" class="w-full btn-suzuki-red btn-feedback py-4 rounded-xl font-bold shadow-md mt-2 italic">生成報價明細單 (截圖用)</button>
             </div>
         </div>
     </div>
@@ -112,7 +114,7 @@
                 </div>
                 <div id="receipt-items" class="space-y-4 mb-8"></div>
                 <div class="border-t-2 border-dashed border-gray-200 pt-6 space-y-3">
-                    <div class="flex justify-between text-gray-500">
+                    <div class="flex justify-between text-gray-500 font-bold text-sm">
                         <span>原始總價</span>
                         <span id="receipt-original"></span>
                     </div>
@@ -128,15 +130,15 @@
                         <span id="receipt-discount"></span>
                     </div>
                     <div class="flex justify-between items-center pt-4 border-t border-gray-100">
-                        <span class="text-lg font-bold">預估成交金額</span>
+                        <span class="text-lg font-bold text-gray-900">預估成交金額</span>
                         <span class="text-3xl font-black text-[#003399]" id="receipt-final"></span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="max-w-md mx-auto mt-8 px-4 flex gap-3 pb-10">
-            <button onclick="closeReceipt()" class="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl font-bold click-feedback">返回選單</button>
-            <button onclick="window.print()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold click-feedback">儲存或列印</button>
+            <button onclick="closeReceipt()" class="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl font-bold btn-feedback">返回選單</button>
+            <button onclick="window.print()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold btn-feedback">儲存或列印</button>
         </div>
     </div>
 
@@ -169,7 +171,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold">資料加載失敗</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold py-10">資料載入失敗，請確認網路連線</p>`;
             }
         }
 
@@ -177,7 +179,7 @@
             const categories = [...new Set(allProducts.map(p => p.category))];
             const nav = document.getElementById('category-nav');
             nav.innerHTML = categories.map(cat => `
-                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer ${cat === currentCategory ? 'active-tab' : 'text-gray-500'} click-feedback">${cat}</span>
+                <span onclick="filterProducts('${cat}')" class="px-4 py-2 cursor-pointer btn-feedback ${cat === currentCategory ? 'active-tab' : 'text-gray-500'}">${cat}</span>
             `).join('');
         }
 
@@ -192,13 +194,13 @@
                         <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between text-center">
-                        <div>
+                        <div class="mb-2">
                             <h3 class="font-bold text-gray-800 text-[13px] leading-tight mb-1">${item.name}</h3>
-                            <p class="text-[10px] text-gray-400 font-medium leading-relaxed mb-2 text-left">${item.desc}</p>
+                            <p class="text-[10px] text-gray-400 font-medium leading-relaxed text-left">${item.desc}</p>
                         </div>
                         <div>
                             <p class="text-[#003399] font-black text-sm mb-2">$${item.price.toLocaleString()}</p>
-                            <button onclick="addToCart('${item.name}', ${item.price})" class="w-full btn-suzuki-red click-feedback text-xs py-2 rounded-lg font-bold">加入</button>
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="w-full btn-suzuki-red btn-feedback text-xs py-2 rounded-lg font-bold">加入</button>
                         </div>
                     </div>
                 </div>
@@ -215,6 +217,7 @@
         }
 
         function removeFromCart(id) {
+            if (window.navigator.vibrate) window.navigator.vibrate(30);
             selectedItems = selectedItems.filter(item => item.id !== id);
             updateCartUI();
         }
@@ -240,7 +243,7 @@
                         <p class="font-bold text-gray-800 text-[13px]">${item.name}</p>
                         <p class="text-xs text-[#003399] font-bold">$${item.price.toLocaleString()}</p>
                     </div>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg font-bold click-feedback">移除</button>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg font-bold btn-feedback">移除</button>
                 </div>
             `).join('') : '<p class="text-center text-gray-400 py-10">選單中尚無品項</p>';
             calculateFinalTotal();
