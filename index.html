@@ -14,7 +14,6 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .btn-suzuki-red { background-color: var(--suzuki-red); color: white; }
         .btn-suzuki-red:active { background-color: #b3000e; }
-        .text-suzuki-blue { color: var(--suzuki-blue); }
         .receipt-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
@@ -61,12 +60,17 @@
                     <span>原始車價總計</span>
                     <span class="font-bold">$ <span id="original-total">0</span></span>
                 </div>
+                
                 <div id="tax-section" class="flex flex-col space-y-1 hidden">
                     <div class="flex justify-between items-center text-[#003399] font-bold">
-                        <span>政府舊換新貨物稅補助</span>
+                        <span>新購車貨物稅補助</span>
                         <span>- $ 50,000</span>
                     </div>
+                    <p class="text-[11px] text-blue-500 font-bold text-right leading-tight italic">
+                        * 需先入車款後由公司三個月內退至車主帳戶
+                    </p>
                 </div>
+
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-red-600">其他折讓/優惠金額</span>
                     <div class="flex items-center bg-white border border-red-200 rounded-lg px-2">
@@ -74,8 +78,9 @@
                         <input type="number" id="manual-discount" oninput="calculateFinalTotal()" placeholder="輸入金額" class="w-24 py-1 text-right focus:outline-none text-red-600 font-bold bg-transparent">
                     </div>
                 </div>
+
                 <div class="flex justify-between items-center pt-3 border-t border-gray-300">
-                    <span class="text-lg font-bold">預估成交總額</span>
+                    <span class="text-lg font-bold text-gray-900">預估成交總額</span>
                     <span class="text-2xl font-black text-[#003399]">$ <span id="final-total">0</span></span>
                 </div>
                 <button onclick="generateReceipt()" class="w-full btn-suzuki-red py-4 rounded-xl font-bold shadow-md mt-2 italic">生成報價明細單 (截圖用)</button>
@@ -83,7 +88,7 @@
         </div>
     </div>
 
-    <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-6">
+    <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-6 text-gray-900">
         <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-2xl overflow-hidden bg-white">
             <div class="bg-[#003399] text-white p-6 text-center">
                 <h2 class="text-2xl font-black tracking-widest">SUZUKI</h2>
@@ -94,42 +99,37 @@
                     <span>報價日期：<span id="receipt-date"></span></span>
                     <span>僅供預算評估參考</span>
                 </div>
-                
-                <div id="receipt-items" class="space-y-4 mb-8">
-                    </div>
-
+                <div id="receipt-items" class="space-y-4 mb-8 text-left"></div>
                 <div class="border-t-2 border-dashed border-gray-200 pt-6 space-y-3">
                     <div class="flex justify-between text-gray-500">
                         <span>原始總價</span>
                         <span id="receipt-original"></span>
                     </div>
-                    <div id="receipt-tax-row" class="flex justify-between text-[#003399] font-bold hidden">
-                        <span>政府舊換新補助</span>
-                        <span>- $ 50,000</span>
+                    <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden">
+                        <div class="flex justify-between text-[#003399] font-bold">
+                            <span>新購車貨物稅補助</span>
+                            <span>- $ 50,000</span>
+                        </div>
+                        <p class="text-[9px] text-blue-400 text-right font-medium italic">* 需先入車款後由公司三個月內退至車主帳戶</p>
                     </div>
                     <div id="receipt-discount-row" class="flex justify-between text-red-600 font-bold hidden">
                         <span>其他優惠折讓</span>
                         <span id="receipt-discount"></span>
                     </div>
                     <div class="flex justify-between items-center pt-4 border-t border-gray-100">
-                        <span class="text-lg font-bold text-gray-900">預估成交金額</span>
+                        <span class="text-lg font-bold">預估成交金額</span>
                         <span class="text-3xl font-black text-[#003399]" id="receipt-final"></span>
                     </div>
                 </div>
-
-                <div class="mt-10 text-center">
-                    <p class="text-[10px] text-gray-300 leading-relaxed">
-                        本報價僅供購車預算參考，實際交易價格與優惠內容<br>請以現場與銷售顧問簽訂之訂購合約為準。
-                    </p>
+                <div class="mt-10 text-center opacity-30 text-[10px]">
+                    本報價僅供購車預算參考，實際交易內容<br>請以銷售顧問簽訂之訂購合約為準。
                 </div>
             </div>
         </div>
-        
         <div class="max-w-md mx-auto mt-8 px-4 flex gap-3">
             <button onclick="closeReceipt()" class="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl font-bold">返回選單</button>
             <button onclick="window.print()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold">儲存或列印</button>
         </div>
-        <p class="text-center text-gray-400 text-xs mt-4">提示：您可以直接截圖此畫面傳送給客戶</p>
     </div>
 
     <script>
@@ -141,7 +141,7 @@
         let selectedItems = [];
         let autoTaxDiscount = 0;
 
-        const taxFreeCars = ["SWIFT", "SCROSS 2WD", "SWIFT 2T", "VITARA 4WD", "VITARA 4WD 2T", "JIMNY"];
+        const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY"];
 
         async function loadData() {
             try {
@@ -161,7 +161,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold">資料讀取失敗</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold">連線失敗</p>`;
             }
         }
 
@@ -189,7 +189,7 @@
                             <p class="text-[10px] text-gray-400 font-medium leading-relaxed mb-2 text-left">${item.desc}</p>
                         </div>
                         <div>
-                            <p class="text-[#003399] font-black text-sm mb-2">$${item.price.toLocaleString()}</p>
+                            <p class="text-suzuki-blue font-black text-sm mb-2">$${item.price.toLocaleString()}</p>
                             <button onclick="addToCart('${item.name}', ${item.price})" class="w-full btn-suzuki-red text-xs py-2 rounded-lg font-bold">加入</button>
                         </div>
                     </div>
@@ -209,33 +209,41 @@
 
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            
+            // 判定是否有補助車種
             const hasTaxFreeCar = selectedItems.some(item => {
                 const upperName = item.name.toUpperCase();
+                if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false;
                 return taxFreeCars.some(car => upperName.includes(car));
             });
+            
             autoTaxDiscount = hasTaxFreeCar ? 50000 : 0;
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) taxSection.classList.remove('hidden');
             else taxSection.classList.add('hidden');
+
             document.getElementById('total-price').innerText = baseTotal.toLocaleString();
             document.getElementById('original-total').innerText = baseTotal.toLocaleString();
             document.getElementById('cart-count').innerText = selectedItems.length;
+            
             const cartList = document.getElementById('cart-items-list');
             cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
                 <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
-                    <div class="flex-1 pr-2">
-                        <p class="font-bold text-gray-800 text-[13px] line-clamp-1">${item.name}</p>
+                    <div class="flex-1 pr-2 text-left">
+                        <p class="font-bold text-gray-800 text-[13px]">${item.name}</p>
                         <p class="text-xs text-[#003399] font-bold">$${item.price.toLocaleString()}</p>
                     </div>
                     <button onclick="removeFromCart(${item.id})" class="text-red-500 text-[10px] border border-red-100 px-3 py-1 rounded-lg font-bold">移除</button>
                 </div>
             `).join('') : '<p class="text-center text-gray-400 py-10">選單中尚無品項</p>';
+            
             calculateFinalTotal();
         }
 
         function calculateFinalTotal() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
+            // 最終總價 = 原始總價 - 自動補助(藍色) - 手動折扣(紅色)
             const finalTotal = baseTotal - autoTaxDiscount - manualDiscount;
             document.getElementById('final-total').innerText = finalTotal.toLocaleString();
             return { baseTotal, manualDiscount, finalTotal };
@@ -243,11 +251,9 @@
 
         function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇車型或配件");
-            
             const totals = calculateFinalTotal();
             const now = new Date();
             document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
-            
             const receiptItems = document.getElementById('receipt-items');
             receiptItems.innerHTML = selectedItems.map(item => `
                 <div class="flex justify-between items-start">
@@ -255,13 +261,14 @@
                     <span class="text-[13px] text-gray-900 font-medium">$${item.price.toLocaleString()}</span>
                 </div>
             `).join('');
-
             document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
             
+            // 處理補助顯示
             const taxRow = document.getElementById('receipt-tax-row');
             if(autoTaxDiscount > 0) taxRow.classList.remove('hidden');
             else taxRow.classList.add('hidden');
 
+            // 處理手動折扣顯示
             const discountRow = document.getElementById('receipt-discount-row');
             if(totals.manualDiscount > 0) {
                 discountRow.classList.remove('hidden');
@@ -271,8 +278,6 @@
             }
 
             document.getElementById('receipt-final').innerText = `$ ${totals.finalTotal.toLocaleString()}`;
-            
-            // 切換畫面
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('summary-modal').style.display = 'none';
             document.getElementById('receipt-view').classList.remove('hidden');
