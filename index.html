@@ -78,7 +78,6 @@
             <button onclick="toggleModal(true)" class="bg-[#E60012] text-white click-heavy px-8 py-4 rounded-2xl font-black shadow-lg">查看內容</button>
         </footer>
     </div>
-
     <div id="summary-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end justify-center" style="display: none;">
         <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 max-h-[85vh] flex flex-col overflow-hidden text-sm shadow-2xl">
             <div class="flex justify-between items-center mb-4 border-b pb-4">
@@ -184,7 +183,7 @@
                 renderCategories();
                 filterProducts(currentCategory);
             } catch (e) {
-                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold py-10">資料載入失敗</p>`;
+                document.getElementById('product-list').innerHTML = `<p class="col-span-2 text-center text-red-500 font-bold py-10">載入失敗</p>`;
             }
         }
 
