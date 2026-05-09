@@ -253,7 +253,110 @@
             document.getElementById('final-total').innerText = (base - disc).toLocaleString();
         }
         function toggleModal(s) { document.getElementById('summary-modal').style.display = s ? 'flex' : 'none'; }
-        
+                let carCount = 0;
+        let autoTaxDiscount = 0;
+        const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY"];
+
+        function removeFromCart(id) {
+            if (window.navigator.vibrate) window.navigator.vibrate(40);
+            selectedItems = selectedItems.filter(item => item.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            
+            // 累計符合補助條件的台數 (排除 CARRY 與 E-VITARA)
+            const targetCars = selectedItems.filter(item => {
+                const upperName = item.name.toUpperCase();
+                if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false;
+                return taxFreeCars.some(car => upperName.includes(car));
+            });
+            
+            carCount = targetCars.length;
+            autoTaxDiscount = carCount * 50000;
+
+            const taxSection = document.getElementById('tax-section');
+            if(autoTaxDiscount > 0) {
+                taxSection.classList.remove('hidden');
+                document.getElementById('tax-total-display').innerText = autoTaxDiscount.toLocaleString();
+                document.getElementById('tax-car-count').innerText = carCount > 1 ? `(${carCount}台)` : "";
+            } else {
+                taxSection.classList.add('hidden');
+            }
+
+            document.getElementById('total-price').innerText = baseTotal.toLocaleString();
+            document.getElementById('original-total').innerText = baseTotal.toLocaleString();
+            document.getElementById('cart-count').innerText = selectedItems.length;
+            
+            const cartList = document.getElementById('cart-items-list');
+            cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <div class="flex-1 pr-4 text-left">
+                        <p class="font-black text-gray-900 text-sm">${item.name}</p>
+                        <p class="text-xs text-[#003399] font-black">$${item.price.toLocaleString()}</p>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-xs bg-red-50 px-4 py-2 rounded-xl font-black click-heavy">移除</button>
+                </div>
+            `).join('') : '<p class="text-center text-gray-400 py-16 font-bold">選單內尚無品項</p>';
+            calculateFinalTotal();
+        }
+
+        function calculateFinalTotal() {
+            const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
+            const finalTotal = baseTotal - autoTaxDiscount - manualDiscount;
+            document.getElementById('final-total').innerText = finalTotal.toLocaleString();
+            return { baseTotal, manualDiscount, finalTotal };
+        }
+
+        function generateReceipt() {
+            if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
+            if (selectedItems.length === 0) return alert("請先選擇內容");
+            const totals = calculateFinalTotal();
+            const now = new Date();
+            document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+            document.getElementById('receipt-no').innerText = Math.floor(Math.random()*9000) + 1000;
+            
+            const receiptItems = document.getElementById('receipt-items');
+            receiptItems.innerHTML = selectedItems.map(item => `
+                <div class="flex justify-between items-start">
+                    <span class="text-sm font-black text-gray-800 flex-1 pr-6">${item.name}</span>
+                    <span class="text-sm text-gray-900 font-bold">$${item.price.toLocaleString()}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
+            
+            const taxRow = document.getElementById('receipt-tax-row');
+            if(autoTaxDiscount > 0) {
+                taxRow.classList.remove('hidden');
+                document.getElementById('receipt-tax-count').innerText = carCount > 1 ? `(${carCount}台)` : "";
+                document.getElementById('receipt-tax-total').innerText = `- $ ${autoTaxDiscount.toLocaleString()}`;
+            } else {
+                taxRow.classList.add('hidden');
+            }
+
+            const discountRow = document.getElementById('receipt-discount-row');
+            if(totals.manualDiscount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+            
+            document.getElementById('receipt-final').innerText = `$ ${totals.finalTotal.toLocaleString()}`;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('summary-modal').style.display = 'none';
+            document.getElementById('receipt-view').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function closeReceipt() {
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('receipt-view').classList.add('hidden');
+        }
+
         loadData();
     </script>
 </body>
