@@ -114,7 +114,47 @@
         </div>
     </div>
 
-    <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4"></div>
+        <!-- 報價單截圖畫面 -->
+    <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
+        <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-[2rem] overflow-hidden bg-white mt-4">
+            <div class="bg-[#003399] text-white p-8 text-center">
+                <h2 class="text-3xl font-black tracking-[0.3em] uppercase">Suzuki</h2>
+                <p class="text-xs opacity-70 mt-2 font-bold uppercase tracking-widest">Quotation Details</p>
+            </div>
+            <div class="p-8 text-left">
+                <div class="flex justify-between text-[10px] text-gray-400 mb-8 border-b pb-2 font-bold">
+                    <span>日期：<span id="receipt-date"></span></span>
+                    <span>NO. <span id="receipt-no"></span></span>
+                </div>
+                <div id="receipt-items" class="space-y-5 mb-10"></div>
+                <div class="border-t-2 border-dashed border-gray-200 pt-8 space-y-4">
+                    <div class="flex justify-between text-gray-400 font-bold">
+                        <span>原始總價</span>
+                        <span id="receipt-original"></span>
+                    </div>
+                    <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden">
+                        <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
+                            <span>新購車貨物稅補助 <span id="receipt-tax-count"></span></span>
+                            <span id="receipt-tax-total"></span>
+                        </div>
+                    </div>
+                    <div id="receipt-discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg">
+                        <span>其他優惠折讓</span>
+                        <span id="receipt-discount"></span>
+                    </div>
+                    <div class="flex justify-between items-center pt-6 border-t-2 border-gray-900">
+                        <span class="text-xl font-black text-gray-900">成交總計</span>
+                        <span class="text-4xl font-black text-[#003399]" id="receipt-final"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-md mx-auto mt-8 px-4 flex gap-4 pb-20">
+            <button onclick="closeReceipt()" class="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold click-heavy">返回修改</button>
+            <button onclick="window.print()" class="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-bold click-heavy shadow-lg">儲存分享</button>
+        </div>
+    </div>
+
 
     <script>
         const sheetID = '1-FY0lTyZhZfeMk4VGIjATYbWF16HAck2oLhxi1JD0rw';
