@@ -132,7 +132,14 @@
                         <span>原始總價</span>
                         <span id="receipt-original"></span>
                     </div>
-                    <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden">
+                    <div id="receipt-tax-row" <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden">
+    <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
+        <span>新購車貨物稅補助 <span id="receipt-tax-count"></span></span>
+        <span id="receipt-tax-total"></span>
+    </div>
+    <p class="text-[9px] text-blue-400 text-right font-medium italic">* 需先入車款後由公司三個月內退至車主帳戶</p>
+</div>
+class="flex flex-col space-y-1 hidden">
                         <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
                             <span>新購車貨物稅補助 <span id="receipt-tax-count"></span></span>
                             <span id="receipt-tax-total"></span>
@@ -279,6 +286,21 @@
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) {
                 taxSection.classList.remove('hidden');
+                // 在 updateCartUI 函數內
+if(autoTaxDiscount > 0) {
+    taxSection.classList.remove('hidden');
+    // ... 原本的顯示金額代碼 ...
+    
+    // 確保備註文字存在 (如果原本被蓋掉了，就補上去)
+    taxSection.innerHTML = `
+        <div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg">
+            <span>新購車貨物稅補助 <span id="tax-car-count">(${carCount}台)</span></span>
+            <span>- $ <span id="tax-total-display">${autoTaxDiscount.toLocaleString()}</span></span>
+        </div>
+        <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight">* 需先入車款後由公司三個月內退至車主帳戶</p>
+    `;
+}
+
                 document.getElementById('tax-total-display').innerText = autoTaxDiscount.toLocaleString();
                 document.getElementById('tax-car-count').innerText = carCount > 1 ? `(${carCount}台)` : "";
             } else {
