@@ -179,6 +179,7 @@
             </div>
         </div>
     </div>
+    
     <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
         <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-[2rem] overflow-hidden bg-white mt-4">
             <div class="bg-[#003399] text-white p-8 text-center relative">
@@ -245,7 +246,6 @@
             <button onclick="window.print()" class="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-bold click-heavy shadow-lg">儲存分享</button>
         </div>
     </div>
-
     <script>
         const sheetID = '1-FY0lTyZhZfeMk4VGIjATYbWF16HAck2oLhxi1JD0rw';
         const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
@@ -277,21 +277,18 @@
                 currentCategory = categories[0];
                 renderCategories();
                 filterProducts(currentCategory);
-                restoreFormState(); // 回頭時自動復原填寫狀態
+                restoreFormState(); 
             } catch (e) { console.error(e); }
         }
 
-        // 跳轉到妳們的外部試算 APP
         function redirectToLoanApp() {
             saveFormState();
             const loanAmt = document.getElementById('loan-amount').value || '';
             const loanPrd = document.getElementById('loan-period').value || '';
-            // 將當前的參數同步串接至妳們的網址中
             const targetUrl = `https://subarudms.github.io/Suzuki-/?amount=${loanAmt}&period=${loanPrd}`;
             window.location.href = targetUrl;
         }
 
-        // 記憶目前表單狀態，避免跳轉回來時被清空
         function saveFormState() {
             const state = {
                 customerName: document.getElementById('customer-name').value,
@@ -308,7 +305,7 @@
             localStorage.setItem('suzuki_cart_state', JSON.stringify(state));
         }
 
-        // 恢復記憶資料
+        // 🌟 已整合雙向連動：自動攔截並帶入車貸試算助手數字的 restoreFormState
         function restoreFormState() {
             const saved = localStorage.getItem('suzuki_cart_state');
             if (saved) {
@@ -325,6 +322,30 @@
                 if(state.selectedItems && state.selectedItems.length > 0) {
                     selectedItems = state.selectedItems;
                 }
+            }
+
+            // 解析車貸傳來的參數
+            const urlParams = new URLSearchParams(window.location.search);
+            const g_loanAmt = urlParams.get('loan_amt');
+            const g_loanPeriod = urlParams.get('loan_period');
+            const g_loanSubsidy = urlParams.get('loan_subsidy');
+
+            if (g_loanAmt) {
+                document.getElementById('loan-amount').value = g_loanAmt;
+            }
+            if (g_loanPeriod) {
+                document.getElementById('loan-period').value = g_loanPeriod;
+            }
+            if (g_loanSubsidy) {
+                document.getElementById('subsidy-interest').value = g_loanSubsidy;
+            }
+
+            // 如果有帶入任何數字，立即彈窗展示並強制計算總額
+            if (g_loanAmt || g_loanPeriod || g_loanSubsidy) {
+                toggleModal(true); 
+                calculateFinalTotal(); 
+                saveFormState(); 
+            } else {
                 updateCartUI();
             }
         }
@@ -470,7 +491,6 @@
             const hasMvFee = document.getElementById('mv-fee-toggle').checked;
             const mvFee = hasMvFee ? 3500 : 0;
 
-            // 總成交價（含補貼息）
             const grandTotal = baseTotal + estimatedLicenseFee + insAmount + mvFee + subsidyInterest - autoTaxDiscount - manualDiscount;
             
             const summarySubsidyRow = document.getElementById('summary-subsidy-row');
@@ -522,7 +542,6 @@
             
             document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
             
-            // 保險
             const insRow = document.getElementById('receipt-insurance-row');
             if (totals.insAmount > 0) {
                 insRow.classList.remove('hidden');
@@ -530,7 +549,6 @@
                 document.getElementById('receipt-ins-total').innerText = `+ $ ${totals.insAmount.toLocaleString()}`;
             } else { insRow.classList.add('hidden'); }
 
-            // 規費動保
             const receiptLicenseRow = document.getElementById('receipt-license-row');
             const totalLicenseAndMv = estimatedLicenseFee + totals.mvFee;
             if (totalLicenseAndMv > 0) {
@@ -539,21 +557,18 @@
                 document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`;
             } else { receiptLicenseRow.classList.add('hidden'); }
 
-            // 補貼息呈現邏輯
             const receiptSubsidyRow = document.getElementById('receipt-subsidy-row');
             if (totals.subsidyInterest > 0) {
                 receiptSubsidyRow.classList.remove('hidden');
                 document.getElementById('receipt-subsidy-total').innerText = `+ $ ${totals.subsidyInterest.toLocaleString()}`;
             } else { receiptSubsidyRow.classList.add('hidden'); }
 
-            // 折讓
             const discountRow = document.getElementById('receipt-discount-row');
             if(totals.manualDiscount > 0) {
                 discountRow.classList.remove('hidden');
                 document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`;
             } else { discountRow.classList.add('hidden'); }
 
-            // 貸款
             const loanRow = document.getElementById('receipt-loan-row');
             const receiptTotalLabel = document.getElementById('receipt-total-label');
             if (totals.loanAmount > 0) {
