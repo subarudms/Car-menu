@@ -91,54 +91,91 @@
                 <h2 class="text-xl font-bold text-gray-800">已選擇項目</h2>
                 <button onclick="toggleModal(false)" class="text-gray-300 text-4xl leading-none click-heavy">&times;</button>
             </div>
-            <div id="cart-items-list" class="flex-1 overflow-y-auto space-y-3"></div>
-            <div class="mt-4 pt-4 border-t space-y-3 bg-gray-50 -mx-6 px-6 pb-8">
+            
+            <div id="cart-items-list" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
+            
+            <div class="mt-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 mb-1">客戶姓名</label>
+                    <input type="text" id="customer-name" placeholder="請輸入姓名" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-gray-800">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 mb-1">聯繫電話</label>
+                    <input type="tel" id="customer-phone" placeholder="請輸入電話" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-gray-800">
+                </div>
+            </div>
+
+            <div class="mt-3 pt-3 border-t space-y-2.5 bg-gray-50 -mx-6 px-6 pb-6">
                 <div class="flex justify-between items-center font-bold">
-                    <span>原始車價總計</span>
+                    <span>原始車價與配件總計</span>
                     <span>$ <span id="original-total">0</span></span>
                 </div>
+                
+                <div id="license-fee-section" class="flex justify-between items-center font-bold text-gray-700 hidden">
+                    <span class="flex items-center gap-1">預估當月領牌規費 <span class="text-[10px] text-gray-400 font-normal" id="license-fee-note"></span></span>
+                    <span>$ <span id="license-fee-total-display">0</span></span>
+                </div>
+
                 <div id="tax-section" class="flex flex-col space-y-1 hidden">
                     </div>
-                <div class="flex justify-between items-center py-2">
+                
+                <div class="flex justify-between items-center py-1">
                     <span class="font-bold text-red-600">折讓優惠金額</span>
                     <input type="number" id="manual-discount" oninput="calculateFinalTotal()" placeholder="0" class="w-24 text-right focus:outline-none text-red-600 font-black bg-transparent text-lg border-b-2 border-red-100">
                 </div>
-                <div class="flex justify-between items-center pt-3 border-t-2">
+                <div class="flex justify-between items-center pt-2.5 border-t-2">
                     <span class="text-lg font-bold">預估成交總額</span>
                     <span class="text-3xl font-black text-[#003399]">$ <span id="final-total">0</span></span>
                 </div>
-                <button onclick="generateReceipt()" class="w-full bg-[#E60012] text-white click-heavy py-5 rounded-2xl font-black shadow-xl mt-2">生成報價明細單</button>
+                <button onclick="generateReceipt()" class="w-full bg-[#E60012] text-white click-heavy py-4 rounded-2xl font-black shadow-xl mt-1">生成報價明細單</button>
             </div>
         </div>
     </div>
-        <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
+    <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
         <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-[2rem] overflow-hidden bg-white mt-4">
-            <div class="bg-[#003399] text-white p-8 text-center">
+            <div class="bg-[#003399] text-white p-8 text-center relative">
                 <h2 class="text-3xl font-black tracking-[0.3em] uppercase">Suzuki</h2>
                 <p class="text-xs opacity-70 mt-2 font-bold uppercase tracking-widest">Quotation Details</p>
             </div>
             <div class="p-8 text-left">
-                <div class="flex justify-between text-[10px] text-gray-400 mb-8 border-b pb-2 font-bold">
+                <div id="receipt-customer-header" class="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-2xl hidden">
+                    <p class="text-base font-black text-gray-900">DEAR. <span id="receipt-c-name"></span> 貴賓</p>
+                    <p class="text-xs text-gray-500 font-bold mt-1">聯繫電話：<span id="receipt-c-phone"></span></p>
+                </div>
+
+                <div class="flex justify-between text-[10px] text-gray-400 mb-6 border-b pb-2 font-bold">
                     <span>日期：<span id="receipt-date"></span></span>
                     <span>NO. <span id="receipt-no"></span></span>
                 </div>
-                <div id="receipt-items" class="space-y-5 mb-10"></div>
-                <div class="border-t-2 border-dashed border-gray-200 pt-8 space-y-4">
+                
+                <div id="receipt-items" class="space-y-5 mb-8"></div>
+                
+                <div class="border-t-2 border-dashed border-gray-200 pt-6 space-y-4">
                     <div class="flex justify-between text-gray-400 font-bold">
-                        <span>原始總價</span>
+                        <span>車價與配件總額</span>
                         <span id="receipt-original"></span>
                     </div>
+
+                    <div id="receipt-license-row" class="flex justify-between text-gray-600 font-bold hidden">
+                        <span>預估當月領牌規費稅金</span>
+                        <span id="receipt-license-total"></span>
+                    </div>
+                    
                     <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden">
                         </div>
+
                     <div id="receipt-discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg">
                         <span>其他優惠折讓</span>
                         <span id="receipt-discount"></span>
                     </div>
+
                     <div class="flex justify-between items-center pt-6 border-t-2 border-gray-900">
-                        <span class="text-xl font-black text-gray-900">成交總計</span>
+                        <span class="text-xl font-black text-gray-900">預估成交總計</span>
                         <span class="text-4xl font-black text-[#003399]" id="receipt-final"></span>
                     </div>
                 </div>
+                
+                <p class="text-[10px] text-gray-400 text-center mt-8 font-medium leading-relaxed">* 本報價具時效性，領牌規費稅金採當月按日指撥精算，實際規費多退少補。</p>
             </div>
         </div>
         <div class="max-w-md mx-auto mt-8 px-4 flex gap-4 pb-20">
@@ -156,7 +193,8 @@
         let selectedItems = [];
         let carCount = 0;
         let autoTaxDiscount = 0;
-        const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY"];
+        let estimatedLicenseFee = 0;
+        const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY", "E-VITARA"];
 
         async function loadData() {
             try {
@@ -237,8 +275,54 @@
             updateCartUI();
         }
 
+        // 核心精算：依據今天日期自動算出比例稅金 (加入 E-VITARA 免稅邏輯)
+        function calculateLicenseFeeByDate() {
+            let totalFee = 0;
+            let hasCar = false;
+            let isElectric = false;
+            
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0);
+            const daysInYear = isLeapYear ? 366 : 365;
+            
+            const endOfYear = new Date(currentYear, 11, 31);
+            const diffTime = Math.abs(endOfYear - now);
+            const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            selectedItems.forEach(item => {
+                const nameUpper = item.name.toUpperCase();
+                let annualTax = 0;
+                
+                if (nameUpper.includes("E-VITARA")) {
+                    // 電動車免牌燃稅，僅收規費與代辦費
+                    totalFee += (1250 + 1000);
+                    hasCar = true;
+                    isElectric = true;
+                } else if (nameUpper.includes("SWIFT")) {
+                    annualTax = 8640;
+                    hasCar = true;
+                } else if (nameUpper.includes("CARRY")) {
+                    annualTax = 7500;
+                    hasCar = true;
+                } else if (taxFreeCars.some(c => nameUpper.includes(c))) {
+                    annualTax = 11920; 
+                    hasCar = true;
+                }
+                
+                if (annualTax > 0) {
+                    const prorationTax = Math.round((annualTax * remainingDays) / daysInYear);
+                    totalFee += (prorationTax + 1250 + 1000);
+                }
+            });
+            
+            return { hasCar, isElectric, totalFee, remainingDays };
+        }
+
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+            
+            // 貨物稅補助台數累計 (排除 CARRY 與 E-VITARA)
             const targetCars = selectedItems.filter(item => {
                 const upperName = item.name.toUpperCase();
                 if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false;
@@ -259,6 +343,23 @@
                 `;
             } else {
                 taxSection.classList.add('hidden');
+            }
+
+            // 處理與顯示動態領牌費
+            const feeInfo = calculateLicenseFeeByDate();
+            const feeSection = document.getElementById('license-fee-section');
+            if (feeInfo.hasCar) {
+                estimatedLicenseFee = feeInfo.totalFee;
+                feeSection.classList.remove('hidden');
+                document.getElementById('license-fee-total-display').innerText = estimatedLicenseFee.toLocaleString();
+                if (feeInfo.isElectric && selectedItems.filter(item => item.name.toUpperCase().includes("E-VITARA")).length === selectedItems.filter(item => taxFreeCars.some(c=>item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY")).length) {
+                    document.getElementById('license-fee-note').innerText = `(電動車免牌燃稅優惠)`;
+                } else {
+                    document.getElementById('license-fee-note').innerText = `(今年剩 ${feeInfo.remainingDays} 天精算)`;
+                }
+            } else {
+                estimatedLicenseFee = 0;
+                feeSection.classList.add('hidden');
             }
 
             document.getElementById('total-price').innerText = baseTotal.toLocaleString();
@@ -282,7 +383,7 @@
         function calculateFinalTotal() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
-            const finalTotal = baseTotal - autoTaxDiscount - manualDiscount;
+            const finalTotal = baseTotal + estimatedLicenseFee - autoTaxDiscount - manualDiscount;
             document.getElementById('final-total').innerText = finalTotal.toLocaleString();
             return { baseTotal, manualDiscount, finalTotal };
         }
@@ -295,6 +396,19 @@
             document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             document.getElementById('receipt-no').innerText = Math.floor(Math.random()*9000) + 1000;
             
+            // 處理專屬客戶抬頭顯示
+            const cName = document.getElementById('customer-name').value.trim();
+            const cPhone = document.getElementById('customer-phone').value.trim();
+            const customerHeader = document.getElementById('receipt-customer-header');
+            
+            if (cName || cPhone) {
+                customerHeader.classList.remove('hidden');
+                document.getElementById('receipt-c-name').innerText = cName || "——";
+                document.getElementById('receipt-c-phone').innerText = cPhone || "——";
+            } else {
+                customerHeader.classList.add('hidden');
+            }
+
             const receiptItems = document.getElementById('receipt-items');
             receiptItems.innerHTML = selectedItems.map(item => `
                 <div class="flex justify-between items-start mb-2">
@@ -308,6 +422,16 @@
             
             document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
             
+            // 處理報價單內的領牌規費顯示
+            const receiptLicenseRow = document.getElementById('receipt-license-row');
+            if (estimatedLicenseFee > 0) {
+                receiptLicenseRow.classList.remove('hidden');
+                document.getElementById('receipt-license-total').innerText = `+ $ ${estimatedLicenseFee.toLocaleString()}`;
+            } else {
+                receiptLicenseRow.classList.add('hidden');
+            }
+
+            // 處理報價單內的補助顯示與備註
             const taxRow = document.getElementById('receipt-tax-row');
             if(autoTaxDiscount > 0) {
                 taxRow.classList.remove('hidden');
