@@ -437,7 +437,7 @@
             return { hasCar, isElectric, totalFee, remainingDays };
         }
 
-        function updateCartUI() {
+                function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             const targetCars = selectedItems.filter(item => {
                 const upperName = item.name.toUpperCase();
@@ -450,11 +450,14 @@
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) {
                 taxSection.classList.remove('hidden');
+                // 🛠️ 這裡修正：將藍色條框與下方的斜體備註完整渲染出來
                 taxSection.innerHTML = `
                     <div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg">
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
                         <span>- $ <span>${autoTaxDiscount.toLocaleString()}</span></span>
-                    </div>`;
+                    </div>
+                    <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>
+                `;
             } else { taxSection.classList.add('hidden'); }
 
             const feeInfo = calculateLicenseFeeByDate();
@@ -481,6 +484,7 @@
                 </div>`).join('') : '<p class="text-center text-gray-400 py-16 font-bold">選單內尚無品項</p>';
             calculateFinalTotal();
         }
+
 
         function calculateFinalTotal() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -517,7 +521,7 @@
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
-                function generateReceipt() {
+                        function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇內容");
             const totals = calculateFinalTotal();
             const now = new Date();
@@ -557,7 +561,7 @@
                 document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`;
             } else { receiptLicenseRow.classList.add('hidden'); }
 
-            // 🛠️ 核心修復：強制將新車貨物稅補助的藍色自保備註灌回報價單中
+            // 🛠️ 這裡修正：確保報價明細單內也印出最新的備註字
             const taxRow = document.getElementById('receipt-tax-row');
             if(autoTaxDiscount > 0) {
                 taxRow.classList.remove('hidden');
@@ -566,7 +570,7 @@
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
                         <span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span>
                     </div>
-                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款後由公司三個月內退至車主帳戶</p>
+                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>
                 `;
             } else { taxRow.classList.add('hidden'); }
 
@@ -597,6 +601,7 @@
             document.getElementById('receipt-view').classList.remove('hidden');
             window.scrollTo(0,0);
         }
+
 
         function closeReceipt() {
             document.getElementById('main-app').classList.remove('hidden');
