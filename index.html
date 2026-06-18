@@ -517,7 +517,7 @@
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
-        function generateReceipt() {
+                function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇內容");
             const totals = calculateFinalTotal();
             const now = new Date();
@@ -556,6 +556,19 @@
                 document.getElementById('receipt-mv-tag').innerText = totals.mvFee > 0 ? " (含動保費)" : "";
                 document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`;
             } else { receiptLicenseRow.classList.add('hidden'); }
+
+            // 🛠️ 核心修復：強制將新車貨物稅補助的藍色自保備註灌回報價單中
+            const taxRow = document.getElementById('receipt-tax-row');
+            if(autoTaxDiscount > 0) {
+                taxRow.classList.remove('hidden');
+                taxRow.innerHTML = `
+                    <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
+                        <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
+                        <span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span>
+                    </div>
+                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款後由公司三個月內退至車主帳戶</p>
+                `;
+            } else { taxRow.classList.add('hidden'); }
 
             const receiptSubsidyRow = document.getElementById('receipt-subsidy-row');
             if (totals.subsidyInterest > 0) {
