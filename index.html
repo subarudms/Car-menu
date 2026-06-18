@@ -88,6 +88,7 @@
         <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 max-h-[90vh] flex flex-col overflow-hidden text-sm shadow-2xl">
             <div class="flex justify-between items-center mb-2 border-b pb-3">
                 <h2 class="text-xl font-bold text-gray-800">已選擇項目</h2>
+                <button onclick="clearAllFormInputs()" class="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-xl font-bold click-heavy border border-red-100">🗑️ 清除內容</button>
                 <button onclick="toggleModal(false)" class="text-gray-300 text-4xl leading-none click-heavy">&times;</button>
             </div>
             
@@ -133,10 +134,14 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 gap-3 border-t pt-2 border-dashed border-blue-200/50">
+                    <div class="grid grid-cols-2 gap-3 border-t pt-2 border-dashed border-blue-200/50">
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款補貼息金額 (若有)</label>
-                            <input type="number" id="subsidy-interest" oninput="calculateFinalTotal(); saveFormState();" placeholder="請輸入試算出的補貼息" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-blue-600">
+                            <input type="number" id="subsidy-interest" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-1">預估貸款月繳額</label>
+                            <input type="text" id="loan-monthly-pay" readonly placeholder="$ 0" class="w-full bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 text-xs font-black text-right text-emerald-600 focus:outline-none">
                         </div>
                     </div>
 
@@ -179,7 +184,6 @@
             </div>
         </div>
     </div>
-    
     <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
         <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-[2rem] overflow-hidden bg-white mt-4">
             <div class="bg-[#003399] text-white p-8 text-center relative">
@@ -228,7 +232,10 @@
                     </div>
 
                     <div id="receipt-loan-row" class="flex justify-between text-amber-600 font-black hidden bg-amber-50 p-2 rounded-lg">
-                        <span>預估銀行貸款 (<span id="receipt-loan-period"></span>期)</span>
+                        <div class="text-left">
+                            <span>預估銀行貸款 (<span id="receipt-loan-period"></span>期)</span>
+                            <p class="text-[10px] text-emerald-600 font-bold" id="receipt-monthly-pay-note"></p>
+                        </div>
                         <span id="receipt-loan-total"></span>
                     </div>
 
@@ -257,6 +264,7 @@
         let autoTaxDiscount = 0;
         let estimatedLicenseFee = 0;
         let finalCalculatedTotal = 0; 
+        let globalMonthlyPay = 0; 
         const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY", "E-VITARA"];
 
         async function loadData() {
@@ -305,7 +313,31 @@
             localStorage.setItem('suzuki_cart_state', JSON.stringify(state));
         }
 
-        // 🌟 已整合雙向連動：自動攔截並帶入車貸試算助手數字的 restoreFormState
+        // 🗑️ 一鍵重設/清空表單核心邏輯
+        function clearAllFormInputs() {
+            if(confirm("確定要清空目前填寫的所有客戶、理財資料與選取項目嗎？")) {
+                document.getElementById('customer-name').value = '';
+                document.getElementById('customer-phone').value = '';
+                document.getElementById('insurance-type').value = '';
+                document.getElementById('insurance-amount').value = '';
+                document.getElementById('loan-amount').value = '';
+                document.getElementById('loan-period').value = '';
+                document.getElementById('subsidy-interest').value = '';
+                document.getElementById('mv-fee-toggle').checked = false;
+                document.getElementById('manual-discount').value = '';
+                document.getElementById('loan-monthly-pay').value = '$ 0';
+                selectedItems = [];
+                globalMonthlyPay = 0;
+                
+                localStorage.removeItem('suzuki_cart_state');
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+
+                updateCartUI();
+                alert("內容已成功完全清空！");
+            }
+        }
+
         function restoreFormState() {
             const saved = localStorage.getItem('suzuki_cart_state');
             if (saved) {
@@ -324,24 +356,18 @@
                 }
             }
 
-            // 解析車貸傳來的參數
             const urlParams = new URLSearchParams(window.location.search);
-            const g_loanAmt = urlParams.get('loan_amt');
-            const g_loanPeriod = urlParams.get('loan_period');
+            const g_loanAmt = urlParams.get('loan_amt') || urlParams.get('amount');
+            const g_loanPeriod = urlParams.get('loan_period') || urlParams.get('period');
             const g_loanSubsidy = urlParams.get('loan_subsidy');
+            const g_loanPay = urlParams.get('loan_pay'); 
 
-            if (g_loanAmt) {
-                document.getElementById('loan-amount').value = g_loanAmt;
-            }
-            if (g_loanPeriod) {
-                document.getElementById('loan-period').value = g_loanPeriod;
-            }
-            if (g_loanSubsidy) {
-                document.getElementById('subsidy-interest').value = g_loanSubsidy;
-            }
+            if (g_loanAmt) document.getElementById('loan-amount').value = g_loanAmt;
+            if (g_loanPeriod) document.getElementById('loan-period').value = g_loanPeriod;
+            if (g_loanSubsidy) document.getElementById('subsidy-interest').value = g_loanSubsidy;
+            if (g_loanPay) globalMonthlyPay = parseInt(g_loanPay) || 0;
 
-            // 如果有帶入任何數字，立即彈窗展示並強制計算總額
-            if (g_loanAmt || g_loanPeriod || g_loanSubsidy) {
+            if (g_loanAmt || g_loanPeriod || g_loanSubsidy || g_loanPay) {
                 toggleModal(true); 
                 calculateFinalTotal(); 
                 saveFormState(); 
@@ -411,60 +437,50 @@
         }
 
         function calculateLicenseFeeByDate() {
-            let totalFee = 0;
-            let hasCar = false;
-            let isElectric = false;
-            const now = new Date();
-            const currentYear = now.getFullYear();
+            let totalFee = 0; let hasCar = false; let isElectric = false;
+            const now = new Date(); const currentYear = now.getFullYear();
             const daysInYear = ((currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0)) ? 366 : 365;
             const endOfYear = new Date(currentYear, 11, 31);
-            const diffTime = Math.abs(endOfYear - now);
-            const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            const remainingDays = Math.ceil(Math.abs(endOfYear - now) / (1000 * 60 * 60 * 24)) + 1;
 
             selectedItems.forEach(item => {
-                const nameUpper = item.name.toUpperCase();
-                let annualTax = 0;
+                const nameUpper = item.name.toUpperCase(); let annualTax = 0;
                 if (nameUpper.includes("E-VITARA")) { totalFee += (1250 + 1000); hasCar = true; isElectric = true; }
                 else if (nameUpper.includes("SWIFT")) { annualTax = 8640; hasCar = true; }
                 else if (nameUpper.includes("CARRY")) { annualTax = 7500; hasCar = true; }
                 else if (taxFreeCars.some(c => nameUpper.includes(c))) { annualTax = 11920; hasCar = true; }
                 
                 if (annualTax > 0) {
-                    const prorationTax = Math.round((annualTax * remainingDays) / daysInYear);
-                    totalFee += (prorationTax + 1250 + 1000);
+                    totalFee += (Math.round((annualTax * remainingDays) / daysInYear) + 1250 + 1000);
                 }
             });
             return { hasCar, isElectric, totalFee, remainingDays };
         }
 
-                function updateCartUI() {
+        function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             const targetCars = selectedItems.filter(item => {
                 const upperName = item.name.toUpperCase();
                 if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false;
                 return taxFreeCars.some(car => upperName.includes(car));
             });
-            carCount = targetCars.length;
-            autoTaxDiscount = carCount * 50000;
+            carCount = targetCars.length; autoTaxDiscount = carCount * 50000;
 
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) {
                 taxSection.classList.remove('hidden');
-                // 🛠️ 這裡修正：將藍色條框與下方的斜體備註完整渲染出來
                 taxSection.innerHTML = `
                     <div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg">
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
                         <span>- $ <span>${autoTaxDiscount.toLocaleString()}</span></span>
                     </div>
-                    <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>
-                `;
+                    <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>`;
             } else { taxSection.classList.add('hidden'); }
 
             const feeInfo = calculateLicenseFeeByDate();
             const feeSection = document.getElementById('license-fee-section');
             if (feeInfo.hasCar) {
-                estimatedLicenseFee = feeInfo.totalFee;
-                feeSection.classList.remove('hidden');
+                estimatedLicenseFee = feeInfo.totalFee; feeSection.classList.remove('hidden');
                 document.getElementById('license-fee-total-display').innerText = estimatedLicenseFee.toLocaleString();
                 document.getElementById('license-fee-note').innerText = feeInfo.isElectric ? `(電動車免稅)` : `(今年剩 ${feeInfo.remainingDays} 天精算)`;
             } else { estimatedLicenseFee = 0; feeSection.classList.add('hidden'); }
@@ -485,18 +501,28 @@
             calculateFinalTotal();
         }
 
-
         function calculateFinalTotal() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
             const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
             const insAmount = parseInt(document.getElementById('insurance-amount').value) || 0;
             const loanAmount = parseInt(document.getElementById('loan-amount').value) || 0;
+            const loanPeriod = parseInt(document.getElementById('loan-period').value) || 0;
             const subsidyInterest = parseInt(document.getElementById('subsidy-interest').value) || 0;
-            const hasMvFee = document.getElementById('mv-fee-toggle').checked;
-            const mvFee = hasMvFee ? 3500 : 0;
+            const mvFee = document.getElementById('mv-fee-toggle').checked ? 3500 : 0;
 
             const grandTotal = baseTotal + estimatedLicenseFee + insAmount + mvFee + subsidyInterest - autoTaxDiscount - manualDiscount;
             
+            if (loanAmount > 0 && loanPeriod > 0) {
+                if (globalMonthlyPay === 0) {
+                    let monthlyRate = 0.03 / 12;
+                    let tempPay = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanPeriod)) / (Math.pow(1 + monthlyRate, loanPeriod) - 1));
+                    if(!isNaN(tempPay)) globalMonthlyPay = tempPay;
+                }
+                document.getElementById('loan-monthly-pay').value = `$ ${globalMonthlyPay.toLocaleString()}`;
+            } else {
+                globalMonthlyPay = 0; document.getElementById('loan-monthly-pay').value = '$ 0';
+            }
+
             const summarySubsidyRow = document.getElementById('summary-subsidy-row');
             if(subsidyInterest > 0) {
                 summarySubsidyRow.classList.remove('hidden');
@@ -505,26 +531,20 @@
 
             const summaryLoanRow = document.getElementById('summary-loan-row');
             const totalTitleLabel = document.getElementById('total-title-label');
-            
             if (loanAmount > 0) {
                 summaryLoanRow.classList.remove('hidden');
                 document.getElementById('summary-loan-display').innerText = loanAmount.toLocaleString();
-                totalTitleLabel.innerText = "預估自備款總額";
-                finalCalculatedTotal = grandTotal - loanAmount;
+                totalTitleLabel.innerText = "預估自備款總額"; finalCalculatedTotal = grandTotal - loanAmount;
             } else {
-                summaryLoanRow.classList.add('hidden');
-                totalTitleLabel.innerText = "預估成交總額";
-                finalCalculatedTotal = grandTotal;
+                summaryLoanRow.classList.add('hidden'); totalTitleLabel.innerText = "預估成交總額"; finalCalculatedTotal = grandTotal;
             }
-
             document.getElementById('final-total').innerText = finalCalculatedTotal.toLocaleString();
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
-                        function generateReceipt() {
+        function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇內容");
-            const totals = calculateFinalTotal();
-            const now = new Date();
+            const totals = calculateFinalTotal(); const now = new Date();
             document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             document.getElementById('receipt-no').innerText = Math.floor(Math.random()*9000) + 1000;
             
@@ -561,7 +581,6 @@
                 document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`;
             } else { receiptLicenseRow.classList.add('hidden'); }
 
-            // 🛠️ 這裡修正：確保報價明細單內也印出最新的備註字
             const taxRow = document.getElementById('receipt-tax-row');
             if(autoTaxDiscount > 0) {
                 taxRow.classList.remove('hidden');
@@ -570,8 +589,7 @@
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
                         <span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span>
                     </div>
-                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>
-                `;
+                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>`;
             } else { taxRow.classList.add('hidden'); }
 
             const receiptSubsidyRow = document.getElementById('receipt-subsidy-row');
@@ -592,6 +610,7 @@
                 loanRow.classList.remove('hidden');
                 document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——";
                 document.getElementById('receipt-loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`;
+                document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : '';
                 receiptTotalLabel.innerText = "預估自備款尾款";
             } else { loanRow.classList.add('hidden'); receiptTotalLabel.innerText = "預估成交總計"; }
             
@@ -601,7 +620,6 @@
             document.getElementById('receipt-view').classList.remove('hidden');
             window.scrollTo(0,0);
         }
-
 
         function closeReceipt() {
             document.getElementById('main-app').classList.remove('hidden');
