@@ -87,11 +87,11 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款金額</label>
-                            <input type="number" id="loan-amount" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-amber-600">
+                            <input type="number" id="loan-amount" oninput="resetGlobalPayOnManual(); calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-amber-600">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款期數 (期)</label>
-                            <input type="number" id="loan-period" oninput="calculateFinalTotal(); saveFormState();" placeholder="例：60" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right">
+                            <input type="number" id="loan-period" oninput="resetGlobalPayOnManual(); calculateFinalTotal(); saveFormState();" placeholder="例：60" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 border-t pt-2 border-dashed border-blue-200/50">
@@ -101,7 +101,7 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">預估貸款月繳額</label>
-                            <input type="text" id="loan-monthly-pay" readonly placeholder="$ 0" class="w-full bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 text-xs font-black text-right text-emerald-600 focus:outline-none">
+                            <input type="number" id="loan-monthly-pay-num" oninput="syncManualMonthlyPay(); calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-black text-right text-emerald-600 focus:outline-none focus:border-[#003399]">
                         </div>
                     </div>
                     <label class="flex items-center gap-2 mt-2 cursor-pointer bg-white p-2.5 rounded-xl border border-blue-100 select-none">
@@ -134,7 +134,7 @@
                     <div id="receipt-insurance-row" class="flex justify-between text-gray-600 font-bold hidden"><span>保險費用 (<span id="receipt-ins-type"></span>)</span><span id="receipt-ins-total"></span></div>
                     <div id="receipt-license-row" class="flex justify-between text-gray-600 font-bold hidden"><span>預估當月領牌規費稅金<span id="receipt-mv-tag"></span></span><span id="receipt-license-total"></span></div>
                     <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden"></div>
-                    <div id="receipt-discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg"><span>其他優惠折讓</span><span id="receipt-discount"></span></div>
+                    <div id="discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg"><span>其他優惠折讓</span><span id="receipt-discount"></span></div>
                     <div id="receipt-subsidy-row" class="flex justify-between text-blue-600 font-black hidden bg-blue-50 p-2 rounded-lg"><span>專案貸款衍生補貼息</span><span id="receipt-subsidy-total"></span></div>
                     <div id="receipt-loan-row" class="flex justify-between text-amber-600 font-black hidden bg-amber-50 p-2 rounded-lg"><div class="text-left"><span>預估銀行貸款 (<span id="receipt-loan-period"></span>期)</span><p class="text-[10px] text-emerald-600 font-bold" id="receipt-monthly-pay-note"></p></div><span id="receipt-loan-total"></span></div>
                     <div class="flex justify-between items-center pt-6 border-t-2 border-gray-900"><span class="text-xl font-black text-gray-900" id="receipt-total-label">預估成交總計</span><span class="text-4xl font-black text-[#003399]" id="receipt-final"></span></div>
@@ -169,7 +169,7 @@
             window.location.href = `https://subarudms.github.io/Suzuki-/?amount=${loanAmt}&period=${loanPrd}`;
         }
 
-        // 📋 這裡精準對齊為妳的 Car-insurance-app 專屬路徑
+        // 📋 快捷跳轉保險
         function redirectToInsuranceApp() {
             saveFormState();
             const firstCar = selectedItems.find(item => taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY"));
@@ -184,12 +184,16 @@
 
         function clearAllFormInputs() {
             if(confirm("確定要清空目前填寫的所有客戶、理財資料與選取項目嗎？")) {
-                document.getElementById('customer-name').value = ''; document.getElementById('customer-phone').value = ''; document.getElementById('insurance-type').value = ''; document.getElementById('insurance-amount').value = ''; document.getElementById('loan-amount').value = ''; document.getElementById('loan-period').value = ''; document.getElementById('subsidy-interest').value = ''; document.getElementById('mv-fee-toggle').checked = false; document.getElementById('manual-discount').value = ''; document.getElementById('loan-monthly-pay').value = '$ 0';
+                document.getElementById('customer-name').value = ''; document.getElementById('customer-phone').value = ''; document.getElementById('insurance-type').value = ''; document.getElementById('insurance-amount').value = ''; document.getElementById('loan-amount').value = ''; document.getElementById('loan-period').value = ''; document.getElementById('subsidy-interest').value = ''; document.getElementById('mv-fee-toggle').checked = false; document.getElementById('manual-discount').value = ''; document.getElementById('loan-monthly-pay-num').value = '';
                 selectedItems = []; globalMonthlyPay = 0; localStorage.removeItem('suzuki_cart_state');
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({path: cleanUrl}, '', cleanUrl); updateCartUI(); alert("內容已成功完全清空！");
             }
         }
+
+        // 🛠️ 修正手動輸入金額與期數時，重設全域外部月繳值以供重新計算
+        function resetGlobalPayOnManual() { globalMonthlyPay = 0; }
+        function syncManualMonthlyPay() { globalMonthlyPay = parseInt(document.getElementById('loan-monthly-pay-num').value) || 0; }
 
         function restoreFormState() {
             const saved = localStorage.getItem('suzuki_cart_state');
@@ -198,12 +202,16 @@
                 document.getElementById('customer-name').value = state.customerName || ''; document.getElementById('customer-phone').value = state.customerPhone || ''; document.getElementById('insurance-type').value = state.insuranceType || ''; document.getElementById('insurance-amount').value = state.insuranceAmount || ''; document.getElementById('loan-amount').value = state.loanAmount || ''; document.getElementById('loan-period').value = state.loanPeriod || ''; document.getElementById('subsidy-interest').value = state.subsidyInterest || ''; document.getElementById('mv-fee-toggle').checked = state.mvFeeToggle || false; document.getElementById('manual-discount').value = state.manualDiscount || ''; globalMonthlyPay = state.globalMonthlyPay || 0;
                 if(state.selectedItems && state.selectedItems.length > 0) { selectedItems = state.selectedItems; }
             }
-            const urlParams = new URLSearchParams(window.location.search), g_loanAmt = urlParams.get('loan_amt') || urlParams.get('amount'), g_loanPeriod = urlParams.get('loan_period') || urlParams.get('period'), g_loanSubsidy = urlParams.get('loan_subsidy'), g_loanPay = urlParams.get('loan_pay'); 
+            const urlParams = new URLSearchParams(window.location.search), g_loanAmt = urlParams.get('loan_amt') || urlParams.get('amount'), g_loanPeriod = urlParams.get('loan_period') || urlParams.get('period'), g_loanSubsidy = urlParams.get('loan_subsidy'), g_loanPay = urlParams.get('loan_pay'), g_from = urlParams.get('from'); 
             if (g_loanAmt) document.getElementById('loan-amount').value = g_loanAmt;
             if (g_loanPeriod) document.getElementById('loan-period').value = g_loanPeriod;
             if (g_loanSubsidy) document.getElementById('subsidy-interest').value = g_loanSubsidy;
-            if (g_loanPay) globalMonthlyPay = parseInt(g_loanPay) || 0;
-            if (g_loanAmt || g_loanPeriod || g_loanSubsidy || g_loanPay) { toggleModal(true); calculateFinalTotal(); saveFormState(); } else { updateCartUI(); }
+            
+            // 🛠️ 關鍵修正點：精準攔截外部貸款小助手傳回來的真正月繳金額數字！
+            if (g_loanPay) { globalMonthlyPay = parseInt(g_loanPay) || 0; }
+            
+            updateCartUI();
+            if (g_from === 'insurance' || g_loanAmt || g_loanPeriod || g_loanPay) { toggleModal(true); calculateFinalTotal(); saveFormState(); }
         }
 
         function renderCategories() {
@@ -265,10 +273,20 @@
         function calculateFinalTotal() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0), manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0, insAmount = parseInt(document.getElementById('insurance-amount').value) || 0, loanAmount = parseInt(document.getElementById('loan-amount').value) || 0, loanPeriod = parseInt(document.getElementById('loan-period').value) || 0, subsidyInterest = parseInt(document.getElementById('subsidy-interest').value) || 0, mvFee = document.getElementById('mv-fee-toggle').checked ? 3500 : 0;
             const grandTotal = baseTotal + estimatedLicenseFee + insAmount + mvFee + subsidyInterest - autoTaxDiscount - manualDiscount;
+            
+            // 🛠️ 核心公式對齊：如果大助手傳來了 3.5% 的月繳值，就絕對不使用 3% 做盲算！
             if (loanAmount > 0 && loanPeriod > 0) {
-                if (globalMonthlyPay === 0) { let monthlyRate = 0.03 / 12; let tempPay = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanPeriod)) / (Math.pow(1 + monthlyRate, loanPeriod) - 1)); if(!isNaN(tempPay)) globalMonthlyPay = tempPay; }
-                document.getElementById('loan-monthly-pay').value = `$ ${globalMonthlyPay.toLocaleString()}`;
-            } else { globalMonthlyPay = 0; document.getElementById('loan-monthly-pay').value = '$ 0'; }
+                if (globalMonthlyPay === 0) { 
+                    // 備用防呆線公式（以 3.5% 為基準）
+                    let monthlyRate = 0.035 / 12; 
+                    globalMonthlyPay = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanPeriod)) / (Math.pow(1 + monthlyRate, loanPeriod) - 1)) || 0; 
+                }
+                document.getElementById('loan-monthly-pay-num').value = globalMonthlyPay > 0 ? globalMonthlyPay : '';
+            } else { 
+                globalMonthlyPay = 0; 
+                document.getElementById('loan-monthly-pay-num').value = ''; 
+            }
+            
             if(subsidyInterest > 0) { document.getElementById('summary-subsidy-row').classList.remove('hidden'); document.getElementById('summary-subsidy-display').innerText = subsidyInterest.toLocaleString(); } else { document.getElementById('summary-subsidy-row').classList.add('hidden'); }
             if (loanAmount > 0) { document.getElementById('summary-loan-row').classList.remove('hidden'); document.getElementById('summary-loan-display').innerText = loanAmount.toLocaleString(); document.getElementById('total-title-label').innerText = "預估自備款總額"; finalCalculatedTotal = grandTotal - loanAmount; } 
             else { document.getElementById('summary-loan-row').classList.add('hidden'); document.getElementById('total-title-label').innerText = "預估成交總額"; finalCalculatedTotal = grandTotal; }
