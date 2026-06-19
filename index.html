@@ -4,86 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SUZUKI 購車選單</title>
-    
     <link rel="apple-touch-icon" href="https://i.postimg.cc/Y2n3JhwG/wen-jian3-172.jpg">
     <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/Y2n3JhwG/wen-jian3-172.jpg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SUZUKI選單">
     <meta name="theme-color" content="#003399">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --suzuki-red: #E60012; --suzuki-blue: #003399; }
         .active-tab { border-bottom: 3px solid var(--suzuki-red); color: var(--suzuki-red); font-weight: bold; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        
-        .click-heavy {
-            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            -webkit-tap-highlight-color: transparent !important;
-        }
+        .click-heavy { transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; -webkit-tap-highlight-color: transparent !important; }
         .click-heavy:active { transform: scale(0.85) !important; filter: brightness(0.8); }
-
-        @keyframes success-flash {
-            0% { background-color: var(--suzuki-red); }
-            50% { background-color: #009944; transform: scale(1.05); }
-            100% { background-color: var(--suzuki-red); }
-        }
+        @keyframes success-flash { 0% { background-color: var(--suzuki-red); } 50% { background-color: #009944; transform: scale(1.05); } 100% { background-color: var(--suzuki-red); } }
         .added-success { animation: success-flash 0.4s ease-out; }
-
-        @keyframes super-bounce {
-            0%, 100% { transform: scale(1); }
-            40% { transform: scale(1.5) rotate(-10deg); }
-            70% { transform: scale(1.2) rotate(10deg); }
-        }
+        @keyframes super-bounce { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.5) rotate(-10deg); } 70% { transform: scale(1.2) rotate(10deg); } }
         .animate-super-bounce { animation: super-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        #image-lightbox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 200;
-            cursor: zoom-out;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        #image-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; cursor: zoom-out; align-items: center; justify-content: center; padding: 20px; }
         .receipt-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); }
     </style>
 </head>
 <body class="bg-gray-100 pb-24 font-sans text-gray-800 select-none">
-
     <div id="main-app">
         <header class="bg-white sticky top-0 shadow-md z-10 text-center py-4">
             <h1 class="text-lg font-black tracking-widest text-gray-900 uppercase">Suzuki 購車選單</h1>
             <nav id="category-nav" class="flex overflow-x-auto whitespace-nowrap px-4 py-2 text-sm bg-white hide-scroll"></nav>
         </header>
-
         <main id="product-list" class="p-4 grid grid-cols-2 gap-4 items-start">
             <p class="col-span-2 text-center py-20 text-gray-400 font-bold animate-pulse">SUZUKI 資料載入中...</p>
         </main>
-
         <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between shadow-[0_-5px_20px_rgba(0,0,0,0.1)] z-20">
             <div class="flex items-center">
                 <div id="cart-icon-container" class="relative bg-blue-50 p-2 rounded-xl">
                     <span id="cart-count" class="absolute -top-2 -right-2 bg-[#E60012] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold shadow-md">0</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-[#003399]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-[#003399]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-xl font-black text-[#003399] tracking-tighter">$ <span id="total-price">0</span></p>
-                </div>
+                <div class="ml-4"><p class="text-xl font-black text-[#003399] tracking-tighter">$ <span id="total-price">0</span></p></div>
             </div>
             <button onclick="toggleModal(true)" class="bg-[#E60012] text-white click-heavy px-8 py-4 rounded-2xl font-black shadow-lg">查看內容</button>
         </footer>
     </div>
-
-    <div id="image-lightbox" onclick="this.style.display='none'">
-        <img id="lightbox-img" class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform duration-300">
-    </div>
-
+    <div id="image-lightbox" onclick="this.style.display='none'"><img id="lightbox-img" class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform duration-300"></div>
     <div id="summary-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end justify-center" style="display: none;">
         <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 max-h-[90vh] flex flex-col overflow-hidden text-sm shadow-2xl">
             <div class="flex justify-between items-center mb-2 border-b pb-3">
@@ -91,10 +53,8 @@
                 <button onclick="clearAllFormInputs()" class="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-xl font-bold click-heavy border border-red-100">🗑️ 清除內容</button>
                 <button onclick="toggleModal(false)" class="text-gray-300 text-4xl leading-none click-heavy">&times;</button>
             </div>
-            
             <div class="flex-1 overflow-y-auto space-y-4 pr-1 hide-scroll">
                 <div id="cart-items-list" class="space-y-3"></div>
-                
                 <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100 grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[11px] font-bold text-gray-400 mb-1">客戶姓名</label>
@@ -105,13 +65,10 @@
                         <input type="tel" id="customer-phone" oninput="saveFormState()" placeholder="請輸入電話" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-gray-800">
                     </div>
                 </div>
-
                 <div class="p-4 bg-blue-50/50 border border-blue-100/60 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center border-b border-dashed border-blue-200/60 pb-2">
                         <p class="text-xs font-black text-[#003399] tracking-wider uppercase">理財與險種精算工具</p>
-                        <button onclick="redirectToInsuranceApp()" class="text-[10px] bg-blue-600 text-white px-2.5 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-0.5">
-                            📋 進入專屬保險試算
-                        </button>
+                        <button onclick="redirectToInsuranceApp()" class="text-[10px] bg-blue-600 text-white px-2.5 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-0.5">📋 進入專屬保險試算</button>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -123,14 +80,10 @@
                             <input type="number" id="insurance-amount" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-[#003399]">
                         </div>
                     </div>
-
                     <div class="border-t pt-2.5 border-dashed border-blue-200/50 flex justify-between items-center">
                         <span class="text-xs font-bold text-gray-500">貸款助手工具</span>
-                        <button onclick="redirectToLoanApp()" class="text-[10px] bg-amber-600 text-white px-2.5 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-0.5">
-                            🌐 進入專屬貸款試算
-                        </button>
+                        <button onclick="redirectToLoanApp()" class="text-[10px] bg-amber-600 text-white px-2.5 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-0.5">🌐 進入專屬貸款試算</button>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款金額</label>
@@ -141,7 +94,6 @@
                             <input type="number" id="loan-period" oninput="calculateFinalTotal(); saveFormState();" placeholder="例：60" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right">
                         </div>
                     </div>
-                    
                     <div class="grid grid-cols-2 gap-3 border-t pt-2 border-dashed border-blue-200/50">
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款補貼息金額</label>
@@ -152,7 +104,6 @@
                             <input type="text" id="loan-monthly-pay" readonly placeholder="$ 0" class="w-full bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 text-xs font-black text-right text-emerald-600 focus:outline-none">
                         </div>
                     </div>
-
                     <label class="flex items-center gap-2 mt-2 cursor-pointer bg-white p-2.5 rounded-xl border border-blue-100 select-none">
                         <input type="checkbox" id="mv-fee-toggle" onchange="calculateFinalTotal(); saveFormState();" class="w-4 h-4 rounded border-gray-300 text-[#003399] focus:ring-[#003399]">
                         <span class="text-xs font-bold text-gray-700">收取貸款動保費 $3,500</span>
@@ -160,99 +111,34 @@
                 </div>
             </div>
             <div class="mt-2 pt-3 border-t space-y-2 bg-gray-50 -mx-6 px-6 pb-6 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
-                <div class="flex justify-between items-center text-gray-500 font-bold text-xs">
-                    <span>原始車價與配件總計</span>
-                    <span>$ <span id="original-total">0</span></span>
-                </div>
-                <div id="license-fee-section" class="flex justify-between items-center font-bold text-gray-600 text-xs hidden">
-                    <span>預估當月領牌規費稅金 <span class="text-[10px] text-gray-400 font-normal" id="license-fee-note"></span></span>
-                    <span>$ <span id="license-fee-total-display">0</span></span>
-                </div>
+                <div class="flex justify-between items-center text-gray-500 font-bold text-xs"><span>原始車價與配件總計</span><span>$ <span id="original-total">0</span></span></div>
+                <div id="license-fee-section" class="flex justify-between items-center font-bold text-gray-600 text-xs hidden"><span>預估當月領牌規費稅金 <span class="text-[10px] text-gray-400 font-normal" id="license-fee-note"></span></span><span>$ <span id="license-fee-total-display">0</span></span></div>
                 <div id="tax-section" class="flex flex-col space-y-1 hidden"></div>
-                <div class="flex justify-between items-center text-xs">
-                    <span class="font-bold text-red-600">折讓優惠金額</span>
-                    <input type="number" id="manual-discount" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-24 text-right focus:outline-none text-red-600 font-black bg-transparent text-sm border-b border-red-100">
-                </div>
-
-                <div id="summary-loan-row" class="justify-between items-center text-amber-600 font-bold text-xs hidden">
-                    <span>預估銀行貸款金額</span>
-                    <span>- $ <span id="summary-loan-display">0</span></span>
-                </div>
-                <div id="summary-subsidy-row" class="justify-between items-center text-blue-600 font-bold text-xs hidden">
-                    <span>貸款衍生補貼息</span>
-                    <span>+ $ <span id="summary-subsidy-display">0</span></span>
-                </div>
-
-                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                    <span class="text-base font-black text-gray-900" id="total-title-label">預估成交總額</span>
-                    <span class="text-2xl font-black text-[#003399]" id="final-total">0</span>
-                </div>
+                <div class="flex justify-between items-center text-xs"><span class="font-bold text-red-600">折讓優惠金額</span><input type="number" id="manual-discount" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-24 text-right focus:outline-none text-red-600 font-black bg-transparent text-sm border-b border-red-100"></div>
+                <div id="summary-loan-row" class="justify-between items-center text-amber-600 font-bold text-xs hidden"><span>預估銀行貸款金額</span><span>- $ <span id="summary-loan-display">0</span></span></div>
+                <div id="summary-subsidy-row" class="justify-between items-center text-blue-600 font-bold text-xs hidden"><span>貸款衍生補貼息</span><span>+ $ <span id="summary-subsidy-display">0</span></span></div>
+                <div class="flex justify-between items-center pt-2 border-t border-gray-200"><span class="text-base font-black text-gray-900" id="total-title-label">預估成交總額</span><span class="text-2xl font-black text-[#003399]">$ <span id="final-total">0</span></span></div>
                 <button onclick="generateReceipt()" class="w-full bg-[#E60012] text-white click-heavy py-4 rounded-2xl font-black shadow-xl mt-1 tracking-widest text-sm">生成報價明細單</button>
             </div>
         </div>
     </div>
-    
     <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
         <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-[2rem] overflow-hidden bg-white mt-4">
-            <div class="bg-[#003399] text-white p-8 text-center relative">
-                <h2 class="text-3xl font-black tracking-[0.3em] uppercase">Suzuki</h2>
-                <p class="text-xs opacity-70 mt-2 font-bold uppercase tracking-widest">Quotation Details</p>
-            </div>
+            <div class="bg-[#003399] text-white p-8 text-center relative"><h2 class="text-3xl font-black tracking-[0.3em] uppercase">Suzuki</h2><p class="text-xs opacity-70 mt-2 font-bold uppercase tracking-widest">Quotation Details</p></div>
             <div class="p-8 text-left">
-                <div id="receipt-customer-header" class="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-2xl hidden">
-                    <p class="text-base font-black text-gray-900">DEAR. <span id="receipt-c-name"></span> 貴賓</p>
-                    <p class="text-xs text-gray-500 font-bold mt-1">聯繫電話：<span id="receipt-c-phone"></span></p>
-                </div>
-
-                <div class="flex justify-between text-[10px] text-gray-400 mb-6 border-b pb-2 font-bold">
-                    <span>日期：<span id="receipt-date"></span></span>
-                    <span>NO. <span id="receipt-no"></span></span>
-                </div>
-                
+                <div id="receipt-customer-header" class="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-2xl hidden"><p class="text-base font-black text-gray-900">DEAR. <span id="receipt-c-name"></span> 貴賓</p><p class="text-xs text-gray-500 font-bold mt-1">聯繫電話：<span id="receipt-c-phone"></span></p></div>
+                <div class="flex justify-between text-[10px] text-gray-400 mb-6 border-b pb-2 font-bold"><span>日期：<span id="receipt-date"></span></span><span>NO. <span id="receipt-no"></span></span></div>
                 <div id="receipt-items" class="space-y-5 mb-8"></div>
-                
                 <div class="border-t-2 border-dashed border-gray-200 pt-6 space-y-4">
-                    <div class="flex justify-between text-gray-400 font-bold">
-                        <span>車價與配件總額</span>
-                        <span id="receipt-original"></span>
-                    </div>
-
-                    <div id="receipt-insurance-row" class="flex justify-between text-gray-600 font-bold hidden">
-                        <span>保險費用 (<span id="receipt-ins-type"></span>)</span>
-                        <span id="receipt-ins-total"></span>
-                    </div>
-
-                    <div id="receipt-license-row" class="flex justify-between text-gray-600 font-bold hidden">
-                        <span>預估當月領牌規費稅金<span id="receipt-mv-tag"></span></span>
-                        <span id="receipt-license-total"></span>
-                    </div>
-                    
+                    <div class="flex justify-between text-gray-400 font-bold"><span>車價與配件總額</span><span id="receipt-original"></span></div>
+                    <div id="receipt-insurance-row" class="flex justify-between text-gray-600 font-bold hidden"><span>保險費用 (<span id="receipt-ins-type"></span>)</span><span id="receipt-ins-total"></span></div>
+                    <div id="receipt-license-row" class="flex justify-between text-gray-600 font-bold hidden"><span>預估當月領牌規費稅金<span id="receipt-mv-tag"></span></span><span id="receipt-license-total"></span></div>
                     <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden"></div>
-
-                    <div id="receipt-discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg">
-                        <span>其他優惠折讓</span>
-                        <span id="receipt-discount"></span>
-                    </div>
-
-                    <div id="receipt-subsidy-row" class="flex justify-between text-blue-600 font-black hidden bg-blue-50 p-2 rounded-lg">
-                        <span>專案貸款衍生補貼息</span>
-                        <span id="receipt-subsidy-total"></span>
-                    </div>
-
-                    <div id="receipt-loan-row" class="flex justify-between text-amber-600 font-black hidden bg-amber-50 p-2 rounded-lg">
-                        <div class="text-left">
-                            <span>預估銀行貸款 (<span id="receipt-loan-period"></span>期)</span>
-                            <p class="text-[10px] text-emerald-600 font-bold" id="receipt-monthly-pay-note"></p>
-                        </div>
-                        <span id="receipt-loan-total"></span>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-6 border-t-2 border-gray-900">
-                        <span class="text-xl font-black text-gray-900" id="receipt-total-label">預估成交總計</span>
-                        <span class="text-4xl font-black text-[#003399]" id="receipt-final"></span>
-                    </div>
+                    <div id="receipt-discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg"><span>其他優惠折讓</span><span id="receipt-discount"></span></div>
+                    <div id="receipt-subsidy-row" class="flex justify-between text-blue-600 font-black hidden bg-blue-50 p-2 rounded-lg"><span>專案貸款衍生補貼息</span><span id="receipt-subsidy-total"></span></div>
+                    <div id="receipt-loan-row" class="flex justify-between text-amber-600 font-black hidden bg-amber-50 p-2 rounded-lg"><div class="text-left"><span>預估銀行貸款 (<span id="receipt-loan-period"></span>期)</span><p class="text-[10px] text-emerald-600 font-bold" id="receipt-monthly-pay-note"></p></div><span id="receipt-loan-total"></span></div>
+                    <div class="flex justify-between items-center pt-6 border-t-2 border-gray-900"><span class="text-xl font-black text-gray-900" id="receipt-total-label">預估成交總計</span><span class="text-4xl font-black text-[#003399]" id="receipt-final"></span></div>
                 </div>
-                
                 <p class="text-[10px] text-gray-400 text-center mt-8 font-medium leading-relaxed">* 本報價具時效性，領牌規費稅金採當月按日指撥精算，實際規費多退少補。</p>
             </div>
         </div>
@@ -264,48 +150,26 @@
     <script>
         const sheetID = '1-FY0lTyZhZfeMk4VGIjATYbWF16HAck2oLhxi1JD0rw';
         const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
-
-        let allProducts = [];
-        let currentCategory = '';
-        let selectedItems = [];
-        let carCount = 0;
-        let autoTaxDiscount = 0;
-        let estimatedLicenseFee = 0;
-        let finalCalculatedTotal = 0; 
-        let globalMonthlyPay = 0; 
+        let allProducts = [], currentCategory = '', selectedItems = [], carCount = 0, autoTaxDiscount = 0, estimatedLicenseFee = 0, finalCalculatedTotal = 0, globalMonthlyPay = 0; 
         const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY", "E-VITARA"];
 
         async function loadData() {
             try {
-                const res = await fetch(url);
-                const text = await res.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                const rows = json.table.rows;
-                allProducts = rows.map(row => ({
-                    category: row.c[0]?.v || '其他',
-                    name: row.c[1]?.v || '',
-                    price: row.c[2]?.v || 0,
-                    desc: row.c[3]?.v || '',
-                    img: row.c[4]?.v || 'https://via.placeholder.com/150',
-                    status: row.c[5]?.v || ''
-                }));
+                const res = await fetch(url), text = await res.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2)), rows = json.table.rows;
+                allProducts = rows.map(row => ({ category: row.c[0]?.v || '其他', name: row.c[1]?.v || '', price: row.c[2]?.v || 0, desc: row.c[3]?.v || '', img: row.c[4]?.v || 'https://via.placeholder.com/150', status: row.c[5]?.v || '' }));
                 const categories = [...new Set(allProducts.map(p => p.category))];
-                currentCategory = categories[0];
-                renderCategories();
-                filterProducts(currentCategory);
-                restoreFormState(); 
+                currentCategory = categories[0]; renderCategories(); filterProducts(currentCategory); restoreFormState(); 
             } catch (e) { console.error(e); }
         }
 
         function redirectToLoanApp() {
             saveFormState();
-            const loanAmt = document.getElementById('loan-amount').value || '';
-            const loanPrd = document.getElementById('loan-period').value || '';
-            const targetUrl = `https://subarudms.github.io/Suzuki-/?amount=${loanAmt}&period=${loanPrd}`;
-            window.location.href = targetUrl;
+            const loanAmt = document.getElementById('loan-amount').value || '', loanPrd = document.getElementById('loan-period').value || '';
+            window.location.href = `https://subarudms.github.io/Suzuki-/?amount=${loanAmt}&period=${loanPrd}`;
         }
 
-        // 📋 快捷跳轉至正確的保險計算機網頁 (已修正為妳獨立儲存庫網址)
+        // 📋 這裡精準對齊為妳的 Car-insurance-app 專屬路徑
         function redirectToInsuranceApp() {
             saveFormState();
             const firstCar = selectedItems.find(item => taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY"));
@@ -314,43 +178,16 @@
         }
 
         function saveFormState() {
-            const state = {
-                customerName: document.getElementById('customer-name').value,
-                customerPhone: document.getElementById('customer-phone').value,
-                insuranceType: document.getElementById('insurance-type').value,
-                insuranceAmount: document.getElementById('insurance-amount').value,
-                loanAmount: document.getElementById('loan-amount').value,
-                loanPeriod: document.getElementById('loan-period').value,
-                subsidyInterest: document.getElementById('subsidy-interest').value,
-                mvFeeToggle: document.getElementById('mv-fee-toggle').checked,
-                manualDiscount: document.getElementById('manual-discount').value,
-                selectedItems: selectedItems,
-                globalMonthlyPay: globalMonthlyPay
-            };
+            const state = { customerName: document.getElementById('customer-name').value, customerPhone: document.getElementById('customer-phone').value, insuranceType: document.getElementById('insurance-type').value, insuranceAmount: document.getElementById('insurance-amount').value, loanAmount: document.getElementById('loan-amount').value, loanPeriod: document.getElementById('loan-period').value, subsidyInterest: document.getElementById('subsidy-interest').value, mvFeeToggle: document.getElementById('mv-fee-toggle').checked, manualDiscount: document.getElementById('manual-discount').value, selectedItems: selectedItems, globalMonthlyPay: globalMonthlyPay };
             localStorage.setItem('suzuki_cart_state', JSON.stringify(state));
         }
 
         function clearAllFormInputs() {
             if(confirm("確定要清空目前填寫的所有客戶、理財資料與選取項目嗎？")) {
-                document.getElementById('customer-name').value = '';
-                document.getElementById('customer-phone').value = '';
-                document.getElementById('insurance-type').value = '';
-                document.getElementById('insurance-amount').value = '';
-                document.getElementById('loan-amount').value = '';
-                document.getElementById('loan-period').value = '';
-                document.getElementById('subsidy-interest').value = '';
-                document.getElementById('mv-fee-toggle').checked = false;
-                document.getElementById('manual-discount').value = '';
-                document.getElementById('loan-monthly-pay').value = '$ 0';
-                selectedItems = [];
-                globalMonthlyPay = 0;
-                
-                localStorage.removeItem('suzuki_cart_state');
+                document.getElementById('customer-name').value = ''; document.getElementById('customer-phone').value = ''; document.getElementById('insurance-type').value = ''; document.getElementById('insurance-amount').value = ''; document.getElementById('loan-amount').value = ''; document.getElementById('loan-period').value = ''; document.getElementById('subsidy-interest').value = ''; document.getElementById('mv-fee-toggle').checked = false; document.getElementById('manual-discount').value = ''; document.getElementById('loan-monthly-pay').value = '$ 0';
+                selectedItems = []; globalMonthlyPay = 0; localStorage.removeItem('suzuki_cart_state');
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                window.history.replaceState({path: cleanUrl}, '', cleanUrl);
-
-                updateCartUI();
-                alert("內容已成功完全清空！");
+                window.history.replaceState({path: cleanUrl}, '', cleanUrl); updateCartUI(); alert("內容已成功完全清空！");
             }
         }
 
@@ -358,299 +195,112 @@
             const saved = localStorage.getItem('suzuki_cart_state');
             if (saved) {
                 const state = JSON.parse(saved);
-                document.getElementById('customer-name').value = state.customerName || '';
-                document.getElementById('customer-phone').value = state.customerPhone || '';
-                document.getElementById('insurance-type').value = state.insuranceType || '';
-                document.getElementById('insurance-amount').value = state.insuranceAmount || '';
-                document.getElementById('loan-amount').value = state.loanAmount || '';
-                document.getElementById('loan-period').value = state.loanPeriod || '';
-                document.getElementById('subsidy-interest').value = state.subsidyInterest || '';
-                document.getElementById('mv-fee-toggle').checked = state.mvFeeToggle || false;
-                document.getElementById('manual-discount').value = state.manualDiscount || '';
-                globalMonthlyPay = state.globalMonthlyPay || 0;
-                if(state.selectedItems && state.selectedItems.length > 0) {
-                    selectedItems = state.selectedItems;
-                }
+                document.getElementById('customer-name').value = state.customerName || ''; document.getElementById('customer-phone').value = state.customerPhone || ''; document.getElementById('insurance-type').value = state.insuranceType || ''; document.getElementById('insurance-amount').value = state.insuranceAmount || ''; document.getElementById('loan-amount').value = state.loanAmount || ''; document.getElementById('loan-period').value = state.loanPeriod || ''; document.getElementById('subsidy-interest').value = state.subsidyInterest || ''; document.getElementById('mv-fee-toggle').checked = state.mvFeeToggle || false; document.getElementById('manual-discount').value = state.manualDiscount || ''; globalMonthlyPay = state.globalMonthlyPay || 0;
+                if(state.selectedItems && state.selectedItems.length > 0) { selectedItems = state.selectedItems; }
             }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const g_loanAmt = urlParams.get('loan_amt') || urlParams.get('amount');
-            const g_loanPeriod = urlParams.get('loan_period') || urlParams.get('period');
-            const g_loanSubsidy = urlParams.get('loan_subsidy');
-            const g_loanPay = urlParams.get('loan_pay'); 
-
+            const urlParams = new URLSearchParams(window.location.search), g_loanAmt = urlParams.get('loan_amt') || urlParams.get('amount'), g_loanPeriod = urlParams.get('loan_period') || urlParams.get('period'), g_loanSubsidy = urlParams.get('loan_subsidy'), g_loanPay = urlParams.get('loan_pay'); 
             if (g_loanAmt) document.getElementById('loan-amount').value = g_loanAmt;
             if (g_loanPeriod) document.getElementById('loan-period').value = g_loanPeriod;
             if (g_loanSubsidy) document.getElementById('subsidy-interest').value = g_loanSubsidy;
             if (g_loanPay) globalMonthlyPay = parseInt(g_loanPay) || 0;
-
-            if (g_loanAmt || g_loanPeriod || g_loanSubsidy || g_loanPay) {
-                toggleModal(true); 
-                calculateFinalTotal(); 
-                saveFormState(); 
-            } else {
-                updateCartUI();
-            }
+            if (g_loanAmt || g_loanPeriod || g_loanSubsidy || g_loanPay) { toggleModal(true); calculateFinalTotal(); saveFormState(); } else { updateCartUI(); }
         }
 
         function renderCategories() {
             const categories = [...new Set(allProducts.map(p => p.category))];
-            const nav = document.getElementById('category-nav');
-            nav.innerHTML = categories.map(cat => `
-                <span onclick="filterProducts('${cat}')" class="px-5 py-2 cursor-pointer click-heavy rounded-full ${cat === currentCategory ? 'active-tab' : 'text-gray-400'}">${cat}</span>
-            `).join('');
+            document.getElementById('category-nav').innerHTML = categories.map(cat => `<span onclick="filterProducts('${cat}')" class="px-5 py-2 cursor-pointer click-heavy rounded-full ${cat === currentCategory ? 'active-tab' : 'text-gray-400'}">${cat}</span>`).join('');
         }
 
         function filterProducts(cat) {
-            currentCategory = cat;
-            renderCategories();
+            currentCategory = cat; renderCategories();
             const filtered = allProducts.filter(p => p.category === cat && p.status !== '隱藏');
-            const list = document.getElementById('product-list');
-            list.innerHTML = filtered.map(item => `
+            document.getElementById('product-list').innerHTML = filtered.map(item => `
                 <div class="bg-white rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col h-full active:scale-95 transition-transform duration-150">
-                    <div class="relative pt-[75%] bg-gray-100" onclick="zoomImage('${item.img}')">
-                        <img src="${item.img}" class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute bottom-2 right-2 bg-black/50 text-white p-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-                    </div>
+                    <div class="relative pt-[75%] bg-gray-100" onclick="zoomImage('${item.img}')"><img src="${item.img}" class="absolute inset-0 w-full h-full object-cover"><div class="absolute bottom-2 right-2 bg-black/50 text-white p-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div></div>
                     <div class="p-4 flex-1 flex flex-col justify-between">
-                        <div class="mb-3 text-center">
-                            <h3 class="font-black text-gray-900 text-sm leading-tight mb-1">${item.name}</h3>
-                            <p class="text-[10px] text-gray-400 line-clamp-2">${item.desc}</p>
-                        </div>
-                        <div>
-                            <p class="text-[#003399] font-black text-center text-lg mb-3">$${item.price.toLocaleString()}</p>
-                            <button onclick="addToCart('${item.name}', ${item.price}, this, '${item.desc.replace(/'/g, "\\'")}')" class="w-full bg-[#E60012] text-white text-xs py-3 rounded-xl font-black click-heavy shadow-md">加入</button>
-                        </div>
+                        <div class="mb-3 text-center"><h3 class="font-black text-gray-900 text-sm leading-tight mb-1">${item.name}</h3><p class="text-[10px] text-gray-400 line-clamp-2">${item.desc}</p></div>
+                        <div><p class="text-[#003399] font-black text-center text-lg mb-3">$${item.price.toLocaleString()}</p><button onclick="addToCart('${item.name}', ${item.price}, this, '${item.desc.replace(/'/g, "\\'")}')" class="w-full bg-[#E60012] text-white text-xs py-3 rounded-xl font-black click-heavy shadow-md">加入</button></div>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        function zoomImage(src) {
-            const lightbox = document.getElementById('image-lightbox');
-            const img = document.getElementById('lightbox-img');
-            img.src = src;
-            lightbox.style.display = 'flex';
-        }
-
-        function addToCart(name, price, btn, desc = '') {
-            if (window.navigator.vibrate) window.navigator.vibrate([60, 40, 60]);
-            selectedItems.push({ id: Date.now(), name, price, desc });
-            btn.innerText = "已加入 ✓";
-            btn.classList.add('added-success');
-            setTimeout(() => { btn.innerText = "加入"; btn.classList.remove('added-success'); }, 600);
-            const cartIcon = document.getElementById('cart-icon-container');
-            cartIcon.classList.add('animate-super-bounce');
-            setTimeout(() => cartIcon.classList.remove('animate-super-bounce'), 400);
-            updateCartUI();
-            saveFormState();
-        }
-
-        function removeFromCart(id) {
-            if (window.navigator.vibrate) window.navigator.vibrate(40);
-            selectedItems = selectedItems.filter(item => item.id !== id);
-            updateCartUI();
-            saveFormState();
-        }
+        function zoomImage(src) { const lightbox = document.getElementById('image-lightbox'); document.getElementById('lightbox-img').src = src; lightbox.style.display = 'flex'; }
+        function addToCart(name, price, btn, desc = '') { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); selectedItems.push({ id: Date.now(), name, price, desc }); btn.innerText = "已加入 ✓"; btn.classList.add('added-success'); setTimeout(() => { btn.innerText = "加入"; btn.classList.remove('added-success'); }, 600); const cartIcon = document.getElementById('cart-icon-container'); cartIcon.classList.add('animate-super-bounce'); setTimeout(() => cartIcon.classList.remove('animate-super-bounce'), 400); updateCartUI(); saveFormState(); }
+        function removeFromCart(id) { if (navigator.vibrate) navigator.vibrate(40); selectedItems = selectedItems.filter(item => item.id !== id); updateCartUI(); saveFormState(); }
 
         function calculateLicenseFeeByDate() {
-            let totalFee = 0; let hasCar = false; let isElectric = false;
-            const now = new Date(); const currentYear = now.getFullYear();
-            const daysInYear = ((currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0)) ? 366 : 365;
-            const endOfYear = new Date(currentYear, 11, 31);
+            let totalFee = 0; let hasCar = false; let isElectric = false; const now = new Date(), currentYear = now.getFullYear();
+            const daysInYear = ((currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0)) ? 366 : 365, endOfYear = new Date(currentYear, 11, 31);
             const remainingDays = Math.ceil(Math.abs(endOfYear - now) / (1000 * 60 * 60 * 24)) + 1;
-
             selectedItems.forEach(item => {
                 const nameUpper = item.name.toUpperCase(); let annualTax = 0;
                 if (nameUpper.includes("E-VITARA")) { totalFee += (1250 + 1000); hasCar = true; isElectric = true; }
                 else if (nameUpper.includes("SWIFT")) { annualTax = 8640; hasCar = true; }
                 else if (nameUpper.includes("CARRY")) { annualTax = 7500; hasCar = true; }
                 else if (taxFreeCars.some(c => nameUpper.includes(c))) { annualTax = 11920; hasCar = true; }
-                
-                if (annualTax > 0) {
-                    totalFee += (Math.round((annualTax * remainingDays) / daysInYear) + 1250 + 1000);
-                }
+                if (annualTax > 0) { totalFee += (Math.round((annualTax * remainingDays) / daysInYear) + 1250 + 1000); }
             });
             return { hasCar, isElectric, totalFee, remainingDays };
         }
 
         function updateCartUI() {
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            const targetCars = selectedItems.filter(item => {
-                const upperName = item.name.toUpperCase();
-                if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false;
-                return taxFreeCars.some(car => upperName.includes(car));
-            });
+            const targetCars = selectedItems.filter(item => { const upperName = item.name.toUpperCase(); if (upperName.includes("E-VITARA") || upperName.includes("CARRY")) return false; return taxFreeCars.some(car => upperName.includes(car)); });
             carCount = targetCars.length; autoTaxDiscount = carCount * 50000;
-
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) {
                 taxSection.classList.remove('hidden');
-                // 🛠️ 精準對齊備註文字
-                taxSection.innerHTML = `
-                    <div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg">
-                        <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
-                        <span>- $ <span>${autoTaxDiscount.toLocaleString()}</span></span>
-                    </div>
-                    <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款三個月後匯入車主帳戶</p>`;
+                taxSection.innerHTML = `<div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg"><span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span><span>- $ <span>${autoTaxDiscount.toLocaleString()}</span></span></div><p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款三個月後匯入車主帳戶</p>`;
             } else { taxSection.classList.add('hidden'); }
-
-            const feeInfo = calculateLicenseFeeByDate();
-            const feeSection = document.getElementById('license-fee-section');
+            const feeInfo = calculateLicenseFeeByDate(), feeSection = document.getElementById('license-fee-section');
             if (feeInfo.hasCar) {
-                estimatedLicenseFee = feeInfo.totalFee; feeSection.classList.remove('hidden');
-                document.getElementById('license-fee-total-display').innerText = estimatedLicenseFee.toLocaleString();
+                estimatedLicenseFee = feeInfo.totalFee; feeSection.classList.remove('hidden'); document.getElementById('license-fee-total-display').innerText = estimatedLicenseFee.toLocaleString();
                 document.getElementById('license-fee-note').innerText = feeInfo.isElectric ? `(電動車免稅)` : `(今年剩 ${feeInfo.remainingDays} 天精算)`;
             } else { estimatedLicenseFee = 0; feeSection.classList.add('hidden'); }
-
-            document.getElementById('total-price').innerText = baseTotal.toLocaleString();
-            document.getElementById('original-total').innerText = baseTotal.toLocaleString();
-            document.getElementById('cart-count').innerText = selectedItems.length;
-            
-            const cartList = document.getElementById('cart-items-list');
-            cartList.innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `
-                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <div class="flex-1 pr-4 text-left">
-                        <p class="font-black text-gray-900 text-sm">${item.name}</p>
-                        <p class="text-xs text-[#003399] font-black mt-1">$${item.price.toLocaleString()}</p>
-                    </div>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-500 text-xs bg-red-50 px-4 py-2 rounded-xl font-black">移除</button>
-                </div>`).join('') : '<p class="text-center text-gray-400 py-16 font-bold">選單內尚無品項</p>';
+            document.getElementById('total-price').innerText = baseTotal.toLocaleString(); document.getElementById('original-total').innerText = baseTotal.toLocaleString(); document.getElementById('cart-count').innerText = selectedItems.length;
+            document.getElementById('cart-items-list').innerHTML = selectedItems.length > 0 ? selectedItems.map(item => `<div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-50"><div class="flex-1 pr-4 text-left"><p class="font-black text-gray-900 text-sm">${item.name}</p><p class="text-xs text-[#003399] font-black mt-1">$${item.price.toLocaleString()}</p></div><button onclick="removeFromCart(${item.id})" class="text-red-500 text-xs bg-red-50 px-4 py-2 rounded-xl font-black">移除</button></div>`).join('') : '<p class="text-center text-gray-400 py-16 font-bold">選單內尚無品項</p>';
             calculateFinalTotal();
         }
 
         function calculateFinalTotal() {
-            const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            const manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0;
-            const insAmount = parseInt(document.getElementById('insurance-amount').value) || 0;
-            const loanAmount = parseInt(document.getElementById('loan-amount').value) || 0;
-            const loanPeriod = parseInt(document.getElementById('loan-period').value) || 0;
-            const subsidyInterest = parseInt(document.getElementById('subsidy-interest').value) || 0;
-            const mvFee = document.getElementById('mv-fee-toggle').checked ? 3500 : 0;
-
+            const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0), manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0, insAmount = parseInt(document.getElementById('insurance-amount').value) || 0, loanAmount = parseInt(document.getElementById('loan-amount').value) || 0, loanPeriod = parseInt(document.getElementById('loan-period').value) || 0, subsidyInterest = parseInt(document.getElementById('subsidy-interest').value) || 0, mvFee = document.getElementById('mv-fee-toggle').checked ? 3500 : 0;
             const grandTotal = baseTotal + estimatedLicenseFee + insAmount + mvFee + subsidyInterest - autoTaxDiscount - manualDiscount;
-            
             if (loanAmount > 0 && loanPeriod > 0) {
-                if (globalMonthlyPay === 0) {
-                    let monthlyRate = 0.03 / 12;
-                    let tempPay = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanPeriod)) / (Math.pow(1 + monthlyRate, loanPeriod) - 1));
-                    if(!isNaN(tempPay)) globalMonthlyPay = tempPay;
-                }
+                if (globalMonthlyPay === 0) { let monthlyRate = 0.03 / 12; let tempPay = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanPeriod)) / (Math.pow(1 + monthlyRate, loanPeriod) - 1)); if(!isNaN(tempPay)) globalMonthlyPay = tempPay; }
                 document.getElementById('loan-monthly-pay').value = `$ ${globalMonthlyPay.toLocaleString()}`;
-            } else {
-                globalMonthlyPay = 0; document.getElementById('loan-monthly-pay').value = '$ 0';
-            }
-
-            const summarySubsidyRow = document.getElementById('summary-subsidy-row');
-            if(subsidyInterest > 0) {
-                summarySubsidyRow.classList.remove('hidden');
-                document.getElementById('summary-subsidy-display').innerText = subsidyInterest.toLocaleString();
-            } else { summarySubsidyRow.classList.add('hidden'); }
-
-            const summaryLoanRow = document.getElementById('summary-loan-row');
-            const totalTitleLabel = document.getElementById('total-title-label');
-            if (loanAmount > 0) {
-                summaryLoanRow.classList.remove('hidden');
-                document.getElementById('summary-loan-display').innerText = loanAmount.toLocaleString();
-                totalTitleLabel.innerText = "預估自備款總額"; finalCalculatedTotal = grandTotal - loanAmount;
-            } else {
-                summaryLoanRow.classList.add('hidden'); totalTitleLabel.innerText = "預估成交總額"; finalCalculatedTotal = grandTotal;
-            }
+            } else { globalMonthlyPay = 0; document.getElementById('loan-monthly-pay').value = '$ 0'; }
+            if(subsidyInterest > 0) { document.getElementById('summary-subsidy-row').classList.remove('hidden'); document.getElementById('summary-subsidy-display').innerText = subsidyInterest.toLocaleString(); } else { document.getElementById('summary-subsidy-row').classList.add('hidden'); }
+            if (loanAmount > 0) { document.getElementById('summary-loan-row').classList.remove('hidden'); document.getElementById('summary-loan-display').innerText = loanAmount.toLocaleString(); document.getElementById('total-title-label').innerText = "預估自備款總額"; finalCalculatedTotal = grandTotal - loanAmount; } 
+            else { document.getElementById('summary-loan-row').classList.add('hidden'); document.getElementById('total-title-label').innerText = "預估成交總額"; finalCalculatedTotal = grandTotal; }
             document.getElementById('final-total').innerText = finalCalculatedTotal.toLocaleString();
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
         function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇內容");
-            const totals = calculateFinalTotal(); const now = new Date();
+            const totals = calculateFinalTotal(), now = new Date();
             document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             document.getElementById('receipt-no').innerText = Math.floor(Math.random()*9000) + 1000;
-            
-            const cName = document.getElementById('customer-name').value.trim();
-            const cPhone = document.getElementById('customer-phone').value.trim();
-            const customerHeader = document.getElementById('receipt-customer-header');
-            if (cName || cPhone) {
-                customerHeader.classList.remove('hidden');
-                document.getElementById('receipt-c-name').innerText = cName || "——";
-                document.getElementById('receipt-c-phone').innerText = cPhone || "——";
-            } else { customerHeader.classList.add('hidden'); }
-
-            const receiptItems = document.getElementById('receipt-items');
-            receiptItems.innerHTML = selectedItems.map(item => `
-                <div class="flex justify-between items-start mb-2">
-                    <div class="text-left flex-1"><p class="text-sm font-black text-gray-800">${item.name}</p></div>
-                    <span class="text-sm text-gray-900 font-bold">$${item.price.toLocaleString()}</span>
-                </div>`).join('');
-            
+            const cName = document.getElementById('customer-name').value.trim(), cPhone = document.getElementById('customer-phone').value.trim(), customerHeader = document.getElementById('receipt-customer-header');
+            if (cName || cPhone) { customerHeader.classList.remove('hidden'); document.getElementById('receipt-c-name').innerText = cName || "——"; document.getElementById('receipt-c-phone').innerText = cPhone || "——"; } else { customerHeader.classList.add('hidden'); }
+            document.getElementById('receipt-items').innerHTML = selectedItems.map(item => `<div class="flex justify-between items-start mb-2"><div class="text-left flex-1"><p class="text-sm font-black text-gray-800">${item.name}</p></div><span class="text-sm text-gray-900 font-bold">$${item.price.toLocaleString()}</span></div>`).join('');
             document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
-            
             const insRow = document.getElementById('receipt-insurance-row');
-            if (totals.insAmount > 0) {
-                insRow.classList.remove('hidden');
-                document.getElementById('receipt-ins-type').innerText = document.getElementById('insurance-type').value.trim() || "汽車任意險";
-                document.getElementById('receipt-ins-total').innerText = `+ $ ${totals.insAmount.toLocaleString()}`;
-            } else { insRow.classList.add('hidden'); }
-
-            const receiptLicenseRow = document.getElementById('receipt-license-row');
-            const totalLicenseAndMv = estimatedLicenseFee + totals.mvFee;
-            if (totalLicenseAndMv > 0) {
-                receiptLicenseRow.classList.remove('hidden');
-                document.getElementById('receipt-mv-tag').innerText = totals.mvFee > 0 ? " (含動保費)" : "";
-                document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`;
-            } else { receiptLicenseRow.classList.add('hidden'); }
-
+            if (totals.insAmount > 0) { insRow.classList.remove('hidden'); document.getElementById('receipt-ins-type').innerText = document.getElementById('insurance-type').value.trim() || "汽車任意險"; document.getElementById('receipt-ins-total').innerText = `+ $ ${totals.insAmount.toLocaleString()}`; } else { insRow.classList.add('hidden'); }
+            const receiptLicenseRow = document.getElementById('receipt-license-row'), totalLicenseAndMv = estimatedLicenseFee + totals.mvFee;
+            if (totalLicenseAndMv > 0) { receiptLicenseRow.classList.remove('hidden'); document.getElementById('receipt-mv-tag').innerText = totals.mvFee > 0 ? " (含動保費)" : ""; document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`; } else { receiptLicenseRow.classList.add('hidden'); }
             const taxRow = document.getElementById('receipt-tax-row');
-            if(autoTaxDiscount > 0) {
-                taxRow.classList.remove('hidden');
-                // 🛠️ 明細單內也同步修正成最新文字
-                taxRow.innerHTML = `
-                    <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
-                        <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
-                        <span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span>
-                    </div>
-                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款三個月後匯入車主帳戶</p>
-                `;
-            } else { taxRow.classList.add('hidden'); }
-
-            const receiptSubsidyRow = document.getElementById('receipt-subsidy-row');
-            if (totals.subsidyInterest > 0) {
-                receiptSubsidyRow.classList.remove('hidden');
-                document.getElementById('receipt-subsidy-total').innerText = `+ $ ${totals.subsidyInterest.toLocaleString()}`;
-            } else { receiptSubsidyRow.classList.add('hidden'); }
-
-            const discountRow = document.getElementById('receipt-discount-row');
-            if(totals.manualDiscount > 0) {
-                discountRow.classList.remove('hidden');
-                document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`;
-            } else { discountRow.classList.add('hidden'); }
-
-            const loanRow = document.getElementById('receipt-loan-row');
-            const receiptTotalLabel = document.getElementById('receipt-total-label');
-            if (totals.loanAmount > 0) {
-                loanRow.classList.remove('hidden');
-                document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——";
-                document.getElementById('loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`;
-                document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : '';
-                receiptTotalLabel.innerText = "預估自備款尾款";
-            } else { loanRow.classList.add('hidden'); receiptTotalLabel.innerText = "預估成交總計"; }
-            
-            document.getElementById('receipt-final').innerText = `$ ${finalCalculatedTotal.toLocaleString()}`;
-            document.getElementById('main-app').classList.add('hidden');
-            document.getElementById('summary-modal').style.display = 'none';
-            document.getElementById('receipt-view').classList.remove('hidden');
-            window.scrollTo(0,0);
+            if(autoTaxDiscount > 0) { taxRow.classList.remove('hidden'); taxRow.innerHTML = `<div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg"><span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span><span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span></div><p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款三個月後匯入車主帳戶</p>`; } else { taxRow.classList.add('hidden'); }
+            if (totals.subsidyInterest > 0) { document.getElementById('receipt-subsidy-row').classList.remove('hidden'); document.getElementById('receipt-subsidy-total').innerText = `+ $ ${totals.subsidyInterest.toLocaleString()}`; } else { document.getElementById('receipt-subsidy-row').classList.add('hidden'); }
+            if(totals.manualDiscount > 0) { document.getElementById('receipt-discount-row').classList.remove('hidden'); document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`; } else { document.getElementById('receipt-discount-row').classList.add('hidden'); }
+            const loanRow = document.getElementById('receipt-loan-row'), receiptTotalLabel = document.getElementById('receipt-total-label');
+            if (totals.loanAmount > 0) { loanRow.classList.remove('hidden'); document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——"; document.getElementById('receipt-loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`; document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : ''; receiptTotalLabel.innerText = "預估自備款尾款"; } 
+            else { loanRow.classList.add('hidden'); receiptTotalLabel.innerText = "預估成交總計"; }
+            document.getElementById('receipt-final').innerText = `$ ${finalCalculatedTotal.toLocaleString()}`; document.getElementById('main-app').classList.add('hidden'); document.getElementById('summary-modal').style.display = 'none'; document.getElementById('receipt-view').classList.remove('hidden'); window.scrollTo(0,0);
         }
 
-        function closeReceipt() {
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('receipt-view').classList.add('hidden');
-        }
-
-        function toggleModal(show) {
-            document.getElementById('summary-modal').style.display = show ? 'flex' : 'none';
-            if(show) updateCartUI();
-        }
-
+        function closeReceipt() { document.getElementById('main-app').classList.remove('hidden'); document.getElementById('receipt-view').classList.add('hidden'); }
+        function toggleModal(show) { document.getElementById('summary-modal').style.display = show ? 'flex' : 'none'; if(show) updateCartUI(); }
         loadData();
     </script>
 </body>
