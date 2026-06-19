@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SUZUKI 購車選單</title>
     
-    <link class="click-heavy" rel="apple-touch-icon" href="https://i.postimg.cc/Y2n3JhwG/wen-jian3-172.jpg">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/Y2n3JhwG/wen-jian3-172.jpg">
     <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/Y2n3JhwG/wen-jian3-172.jpg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -107,10 +107,10 @@
                 </div>
 
                 <div class="p-4 bg-blue-50/50 border border-blue-100/60 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <p class="text-xs font-black text-[#003399] tracking-wider uppercase">保險與貸款設定</p>
-                        <button onclick="redirectToLoanApp()" class="text-[10px] bg-[#003399] text-white px-3 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-1">
-                            🌐 進入專屬貸款試算
+                    <div class="flex justify-between items-center border-b border-dashed border-blue-200/60 pb-2">
+                        <p class="text-xs font-black text-[#003399] tracking-wider uppercase">理財與險種精算工具</p>
+                        <button onclick="redirectToInsuranceApp()" class="text-[10px] bg-blue-600 text-white px-2.5 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-0.5">
+                            📋 進入專屬保險試算
                         </button>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
@@ -123,7 +123,15 @@
                             <input type="number" id="insurance-amount" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-[#003399]">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 border-t pt-2.5 border-dashed border-blue-200/50">
+
+                    <div class="border-t pt-2.5 border-dashed border-blue-200/50 flex justify-between items-center">
+                        <span class="text-xs font-bold text-gray-500">貸款助手工具</span>
+                        <button onclick="redirectToLoanApp()" class="text-[10px] bg-amber-600 text-white px-2.5 py-1.5 rounded-xl font-black shadow-sm click-heavy flex items-center gap-0.5">
+                            🌐 進入專屬貸款試算
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款金額</label>
                             <input type="number" id="loan-amount" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-amber-600">
@@ -136,7 +144,7 @@
                     
                     <div class="grid grid-cols-2 gap-3 border-t pt-2 border-dashed border-blue-200/50">
                         <div>
-                            <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款補貼息金額 (若有)</label>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-1">貸款補貼息金額</label>
                             <input type="number" id="subsidy-interest" oninput="calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-right text-blue-600">
                         </div>
                         <div>
@@ -151,7 +159,6 @@
                     </label>
                 </div>
             </div>
-
             <div class="mt-2 pt-3 border-t space-y-2 bg-gray-50 -mx-6 px-6 pb-6 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
                 <div class="flex justify-between items-center text-gray-500 font-bold text-xs">
                     <span>原始車價與配件總計</span>
@@ -184,6 +191,7 @@
             </div>
         </div>
     </div>
+    
     <div id="receipt-view" class="hidden fixed inset-0 bg-white z-[100] overflow-y-auto p-4 text-gray-900">
         <div class="max-w-md mx-auto receipt-shadow border border-gray-100 rounded-[2rem] overflow-hidden bg-white mt-4">
             <div class="bg-[#003399] text-white p-8 text-center relative">
@@ -297,6 +305,17 @@
             window.location.href = targetUrl;
         }
 
+        // 📋 快捷跳轉至保險計算機網頁
+        function redirectToInsuranceApp() {
+            saveFormState();
+            // 自動偵測當前選中的車型，並在跳轉時透過參數帶過去（如果保險網頁未來有支援連動讀取的話）
+            const firstCar = selectedItems.find(item => taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY"));
+            const carParam = firstCar ? encodeURIComponent(firstCar.name) : '';
+            
+            // 這裡會自動前往保險試算網頁
+            window.location.href = `https://subarudms.github.io/Suzuki-/insurance.html?car=${carParam}`;
+        }
+
         function saveFormState() {
             const state = {
                 customerName: document.getElementById('customer-name').value,
@@ -308,12 +327,12 @@
                 subsidyInterest: document.getElementById('subsidy-interest').value,
                 mvFeeToggle: document.getElementById('mv-fee-toggle').checked,
                 manualDiscount: document.getElementById('manual-discount').value,
-                selectedItems: selectedItems
+                selectedItems: selectedItems,
+                globalMonthlyPay: globalMonthlyPay
             };
             localStorage.setItem('suzuki_cart_state', JSON.stringify(state));
         }
 
-        // 🗑️ 一鍵重設/清空表單核心邏輯
         function clearAllFormInputs() {
             if(confirm("確定要清空目前填寫的所有客戶、理財資料與選取項目嗎？")) {
                 document.getElementById('customer-name').value = '';
@@ -351,6 +370,7 @@
                 document.getElementById('subsidy-interest').value = state.subsidyInterest || '';
                 document.getElementById('mv-fee-toggle').checked = state.mvFeeToggle || false;
                 document.getElementById('manual-discount').value = state.manualDiscount || '';
+                globalMonthlyPay = state.globalMonthlyPay || 0;
                 if(state.selectedItems && state.selectedItems.length > 0) {
                     selectedItems = state.selectedItems;
                 }
@@ -469,12 +489,13 @@
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) {
                 taxSection.classList.remove('hidden');
+                // 🛠️ 這裡精準同步備註內容
                 taxSection.innerHTML = `
                     <div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg">
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
                         <span>- $ <span>${autoTaxDiscount.toLocaleString()}</span></span>
                     </div>
-                    <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>`;
+                    <p class="text-[11px] text-blue-500 font-bold text-right italic leading-tight mt-1">* 需先入車款三個月後匯入車主帳戶</p>`;
             } else { taxSection.classList.add('hidden'); }
 
             const feeInfo = calculateLicenseFeeByDate();
@@ -483,7 +504,7 @@
                 estimatedLicenseFee = feeInfo.totalFee; feeSection.classList.remove('hidden');
                 document.getElementById('license-fee-total-display').innerText = estimatedLicenseFee.toLocaleString();
                 document.getElementById('license-fee-note').innerText = feeInfo.isElectric ? `(電動車免稅)` : `(今年剩 ${feeInfo.remainingDays} 天精算)`;
-            } else { estimatedLicenseFee = 0; feeSection.classList.add('hidden'); }
+            } else { estimatedLicenseFee = 0; feeSection.textSection = ''; feeSection.classList.add('hidden'); }
 
             document.getElementById('total-price').innerText = baseTotal.toLocaleString();
             document.getElementById('original-total').innerText = baseTotal.toLocaleString();
@@ -584,12 +605,14 @@
             const taxRow = document.getElementById('receipt-tax-row');
             if(autoTaxDiscount > 0) {
                 taxRow.classList.remove('hidden');
+                // 🛠️ 報價明細單內也同步修正成最新備註文字
                 taxRow.innerHTML = `
                     <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
                         <span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span>
                     </div>
-                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款後由公司三個月內退至車主帳戶（需先入車款三個月後匯入車主帳戶）</p>`;
+                    <p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款三個月後匯入車主帳戶</p>
+                `;
             } else { taxRow.classList.add('hidden'); }
 
             const receiptSubsidyRow = document.getElementById('receipt-subsidy-row');
@@ -609,7 +632,7 @@
             if (totals.loanAmount > 0) {
                 loanRow.classList.remove('hidden');
                 document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——";
-                document.getElementById('receipt-loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`;
+                document.getElementById('loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`;
                 document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : '';
                 receiptTotalLabel.innerText = "預估自備款尾款";
             } else { loanRow.classList.add('hidden'); receiptTotalLabel.innerText = "預估成交總計"; }
