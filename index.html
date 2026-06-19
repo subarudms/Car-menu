@@ -101,6 +101,7 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-1">預估貸款月繳額</label>
+                            <!-- 🛠️ 深度改進：修改為可直接接收精準手動輸入或大助手回傳值 -->
                             <input type="number" id="loan-monthly-pay-num" oninput="syncManualMonthlyPay(); calculateFinalTotal(); saveFormState();" placeholder="0" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-black text-right text-emerald-600 focus:outline-none focus:border-[#003399]">
                         </div>
                     </div>
@@ -134,7 +135,7 @@
                     <div id="receipt-insurance-row" class="flex justify-between text-gray-600 font-bold hidden"><span>保險費用 (<span id="receipt-ins-type"></span>)</span><span id="receipt-ins-total"></span></div>
                     <div id="receipt-license-row" class="flex justify-between text-gray-600 font-bold hidden"><span>預估當月領牌規費稅金<span id="receipt-mv-tag"></span></span><span id="receipt-license-total"></span></div>
                     <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden"></div>
-                    <div id="discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg"><span>其他優惠折讓</span><span id="receipt-discount"></span></div>
+                    <div id="receipt-discount-row" class="flex justify-between text-red-600 font-black hidden bg-red-50 p-2 rounded-lg"><span>其他優惠折讓</span><span id="receipt-discount"></span></div>
                     <div id="receipt-subsidy-row" class="flex justify-between text-blue-600 font-black hidden bg-blue-50 p-2 rounded-lg"><span>專案貸款衍生補貼息</span><span id="receipt-subsidy-total"></span></div>
                     <div id="receipt-loan-row" class="flex justify-between text-amber-600 font-black hidden bg-amber-50 p-2 rounded-lg"><div class="text-left"><span>預估銀行貸款 (<span id="receipt-loan-period"></span>期)</span><p class="text-[10px] text-emerald-600 font-bold" id="receipt-monthly-pay-note"></p></div><span id="receipt-loan-total"></span></div>
                     <div class="flex justify-between items-center pt-6 border-t-2 border-gray-900"><span class="text-xl font-black text-gray-900" id="receipt-total-label">預估成交總計</span><span class="text-4xl font-black text-[#003399]" id="receipt-final"></span></div>
@@ -169,7 +170,6 @@
             window.location.href = `https://subarudms.github.io/Suzuki-/?amount=${loanAmt}&period=${loanPrd}`;
         }
 
-        // 📋 快捷跳轉保險
         function redirectToInsuranceApp() {
             saveFormState();
             const firstCar = selectedItems.find(item => taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY"));
@@ -191,7 +191,6 @@
             }
         }
 
-        // 🛠️ 修正手動輸入金額與期數時，重設全域外部月繳值以供重新計算
         function resetGlobalPayOnManual() { globalMonthlyPay = 0; }
         function syncManualMonthlyPay() { globalMonthlyPay = parseInt(document.getElementById('loan-monthly-pay-num').value) || 0; }
 
@@ -207,7 +206,7 @@
             if (g_loanPeriod) document.getElementById('loan-period').value = g_loanPeriod;
             if (g_loanSubsidy) document.getElementById('subsidy-interest').value = g_loanSubsidy;
             
-            // 🛠️ 關鍵修正點：精準攔截外部貸款小助手傳回來的真正月繳金額數字！
+            // 🛠️ 核心：讀到大助手傳回來的任何月繳金額（不管是 5% 還是 10% 算出來的），一律死死鎖定
             if (g_loanPay) { globalMonthlyPay = parseInt(g_loanPay) || 0; }
             
             updateCartUI();
@@ -274,14 +273,13 @@
             const baseTotal = selectedItems.reduce((sum, item) => sum + item.price, 0), manualDiscount = parseInt(document.getElementById('manual-discount').value) || 0, insAmount = parseInt(document.getElementById('insurance-amount').value) || 0, loanAmount = parseInt(document.getElementById('loan-amount').value) || 0, loanPeriod = parseInt(document.getElementById('loan-period').value) || 0, subsidyInterest = parseInt(document.getElementById('subsidy-interest').value) || 0, mvFee = document.getElementById('mv-fee-toggle').checked ? 3500 : 0;
             const grandTotal = baseTotal + estimatedLicenseFee + insAmount + mvFee + subsidyInterest - autoTaxDiscount - manualDiscount;
             
-            // 🛠️ 核心公式對齊：如果大助手傳來了 3.5% 的月繳值，就絕對不使用 3% 做盲算！
+            // 🛠️ 終極修復亮點：如果全域變數有大助手傳回來的真正月繳值，直接沿用，不再盲算
             if (loanAmount > 0 && loanPeriod > 0) {
                 if (globalMonthlyPay === 0) { 
-                    // 備用防呆線公式（以 3.5% 為基準）
                     let monthlyRate = 0.035 / 12; 
                     globalMonthlyPay = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanPeriod)) / (Math.pow(1 + monthlyRate, loanPeriod) - 1)) || 0; 
                 }
-                document.getElementById('loan-monthly-pay-num').value = globalMonthlyPay > 0 ? globalMonthlyPay : '';
+                document.getElementById('loan-monthly-pay-num').value = globalMonthlyPay;
             } else { 
                 globalMonthlyPay = 0; 
                 document.getElementById('loan-monthly-pay-num').value = ''; 
@@ -312,7 +310,7 @@
             if (totals.subsidyInterest > 0) { document.getElementById('receipt-subsidy-row').classList.remove('hidden'); document.getElementById('receipt-subsidy-total').innerText = `+ $ ${totals.subsidyInterest.toLocaleString()}`; } else { document.getElementById('receipt-subsidy-row').classList.add('hidden'); }
             if(totals.manualDiscount > 0) { document.getElementById('receipt-discount-row').classList.remove('hidden'); document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`; } else { document.getElementById('receipt-discount-row').classList.add('hidden'); }
             const loanRow = document.getElementById('receipt-loan-row'), receiptTotalLabel = document.getElementById('receipt-total-label');
-            if (totals.loanAmount > 0) { loanRow.classList.remove('hidden'); document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——"; document.getElementById('receipt-loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`; document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : ''; receiptTotalLabel.innerText = "預估自備款尾款"; } 
+            if (totals.loanAmount > 0) { loanRow.classList.remove('hidden'); document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——"; document.getElementById('loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`; document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : ''; receiptTotalLabel.innerText = "預估自備款尾款"; } 
             else { loanRow.classList.add('hidden'); receiptTotalLabel.innerText = "預估成交總計"; }
             document.getElementById('receipt-final').innerText = `$ ${finalCalculatedTotal.toLocaleString()}`; document.getElementById('main-app').classList.add('hidden'); document.getElementById('summary-modal').style.display = 'none'; document.getElementById('receipt-view').classList.remove('hidden'); window.scrollTo(0,0);
         }
