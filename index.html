@@ -185,7 +185,7 @@
 
                 <div class="flex justify-between items-center pt-2 border-t border-gray-200">
                     <span class="text-base font-black text-gray-900" id="total-title-label">預估成交總額</span>
-                    <span class="text-2xl font-black text-[#003399]">$ <span id="final-total">0</span></span>
+                    <span class="text-2xl font-black text-[#003399]" id="final-total">0</span>
                 </div>
                 <button onclick="generateReceipt()" class="w-full bg-[#E60012] text-white click-heavy py-4 rounded-2xl font-black shadow-xl mt-1 tracking-widest text-sm">生成報價明細單</button>
             </div>
@@ -305,15 +305,12 @@
             window.location.href = targetUrl;
         }
 
-        // 📋 快捷跳轉至保險計算機網頁
+        // 📋 快捷跳轉至正確的保險計算機網頁 (已修正為妳獨立儲存庫網址)
         function redirectToInsuranceApp() {
             saveFormState();
-            // 自動偵測當前選中的車型，並在跳轉時透過參數帶過去（如果保險網頁未來有支援連動讀取的話）
             const firstCar = selectedItems.find(item => taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY"));
             const carParam = firstCar ? encodeURIComponent(firstCar.name) : '';
-            
-            // 這裡會自動前往保險試算網頁
-            window.location.href = `https://subarudms.github.io/Suzuki-/insurance.html?car=${carParam}`;
+            window.location.href = `https://subarudms.github.io/Car-insurance-app/?car=${carParam}`;
         }
 
         function saveFormState() {
@@ -489,7 +486,7 @@
             const taxSection = document.getElementById('tax-section');
             if(autoTaxDiscount > 0) {
                 taxSection.classList.remove('hidden');
-                // 🛠️ 這裡精準同步備註內容
+                // 🛠️ 精準對齊備註文字
                 taxSection.innerHTML = `
                     <div class="flex justify-between items-center text-[#003399] font-bold bg-blue-100 p-2 rounded-lg">
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
@@ -504,7 +501,7 @@
                 estimatedLicenseFee = feeInfo.totalFee; feeSection.classList.remove('hidden');
                 document.getElementById('license-fee-total-display').innerText = estimatedLicenseFee.toLocaleString();
                 document.getElementById('license-fee-note').innerText = feeInfo.isElectric ? `(電動車免稅)` : `(今年剩 ${feeInfo.remainingDays} 天精算)`;
-            } else { estimatedLicenseFee = 0; feeSection.textSection = ''; feeSection.classList.add('hidden'); }
+            } else { estimatedLicenseFee = 0; feeSection.classList.add('hidden'); }
 
             document.getElementById('total-price').innerText = baseTotal.toLocaleString();
             document.getElementById('original-total').innerText = baseTotal.toLocaleString();
@@ -605,7 +602,7 @@
             const taxRow = document.getElementById('receipt-tax-row');
             if(autoTaxDiscount > 0) {
                 taxRow.classList.remove('hidden');
-                // 🛠️ 報價明細單內也同步修正成最新備註文字
+                // 🛠️ 明細單內也同步修正成最新文字
                 taxRow.innerHTML = `
                     <div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg">
                         <span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span>
