@@ -214,17 +214,30 @@
             document.getElementById('category-nav').innerHTML = categories.map(cat => `<span onclick="filterProducts('${cat}')" class="px-5 py-2 cursor-pointer click-heavy rounded-full ${cat === currentCategory ? 'active-tab' : 'text-gray-400'}">${cat}</span>`).join('');
         }
 
+        // 🛠️ 核心：在首頁產品卡片上，渲染「劃線原價」與「藍色特惠價」的雙層結構
         function filterProducts(cat) {
             currentCategory = cat; renderCategories();
             const filtered = allProducts.filter(p => p.category === cat && p.status !== '隱藏');
-            document.getElementById('product-list').innerHTML = filtered.map(item => `
+            document.getElementById('product-list').innerHTML = filtered.map(item => {
+                // 自動防呆算計原價：汽車項目自動加35000元作為被劃線的原價，其餘週邊配件自動加價10%作為定價
+                const isCar = taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY");
+                const originalMarketPrice = isCar ? (item.price + 35000) : Math.round(item.price * 1.1);
+
+                return `
                 <div class="bg-white rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col h-full active:scale-95 transition-transform duration-150">
                     <div class="relative pt-[75%] bg-gray-100" onclick="zoomImage('${item.img}')"><img src="${item.img}" class="absolute inset-0 w-full h-full object-cover"><div class="absolute bottom-2 right-2 bg-black/50 text-white p-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div></div>
                     <div class="p-4 flex-1 flex flex-col justify-between">
                         <div class="mb-3 text-center"><h3 class="font-black text-gray-900 text-sm leading-tight mb-1">${item.name}</h3><p class="text-[10px] text-gray-400 line-clamp-2">${item.desc}</p></div>
-                        <div><p class="text-[#003399] font-black text-center text-lg mb-3">$${item.price.toLocaleString()}</p><button onclick="addToCart('${item.name}', ${item.price}, this, '${item.desc.replace(/'/g, "\\'")}')" class="w-full bg-[#E60012] text-white text-xs py-3 rounded-xl font-black click-heavy shadow-md">加入</button></div>
+                        <div>
+                            <div class="text-center mb-2">
+                                <span class="text-xs text-red-500 line-through font-bold opacity-80">$${originalMarketPrice.toLocaleString()}</span>
+                                <p class="text-[#003399] font-black text-xl tracking-tighter mt-0.5">$${item.price.toLocaleString()}</p>
+                            </div>
+                            <button onclick="addToCart('${item.name}', ${item.price}, this, '${item.desc.replace(/'/g, "\\'")}')" class="w-full bg-[#E60012] text-white text-xs py-3 rounded-xl font-black click-heavy shadow-md">加入</button>
+                        </div>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
         function zoomImage(src) { const lightbox = document.getElementById('image-lightbox'); document.getElementById('lightbox-img').src = src; lightbox.style.display = 'flex'; }
@@ -279,7 +292,6 @@
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
-        // 🛠️ 深度大掃除：完全修正對稱抓取，防堵漏字造成按鈕沒反應！
         function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇內容");
             const totals = calculateFinalTotal(), now = new Date();
@@ -297,12 +309,11 @@
             if(autoTaxDiscount > 0) { taxRow.classList.remove('hidden'); taxRow.innerHTML = `<div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg"><span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span><span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span></div><p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款三個月後匯入車主帳戶</p>`; } else { taxRow.classList.add('hidden'); }
             if (totals.subsidyInterest > 0) { document.getElementById('receipt-subsidy-row').classList.remove('hidden'); document.getElementById('receipt-subsidy-total').innerText = `+ $ ${totals.subsidyInterest.toLocaleString()}`; } else { document.getElementById('receipt-subsidy-row').classList.add('hidden'); }
             
-            // 🛠&emsp;對齊修正：這行抓取 receipt-discount-row 與金額，確保折讓優惠同步生成不當機！
             const receiptDiscountRow = document.getElementById('receipt-discount-row');
             if(totals.manualDiscount > 0) { receiptDiscountRow.classList.remove('hidden'); document.getElementById('receipt-discount').innerText = `- $ ${totals.manualDiscount.toLocaleString()}`; } else { receiptDiscountRow.classList.add('hidden'); }
             
             const loanRow = document.getElementById('receipt-loan-row'), receiptTotalLabel = document.getElementById('receipt-total-label');
-            if (totals.loanAmount > 0) { loanRow.classList.remove('hidden'); document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——"; document.getElementById('receipt-loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`; document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : ''; receiptTotalLabel.innerText = "預估自備款尾款"; } 
+            if (totals.loanAmount > 0) { loanRow.classList.remove('hidden'); document.getElementById('receipt-loan-period').innerText = document.getElementById('loan-period').value.trim() || "——"; document.getElementById('loan-total').innerText = `- $ ${totals.loanAmount.toLocaleString()}`; document.getElementById('receipt-monthly-pay-note').innerText = globalMonthlyPay > 0 ? `預估月繳約 $ ${globalMonthlyPay.toLocaleString()} 元` : ''; receiptTotalLabel.innerText = "預估自備款尾款"; } 
             else { loanRow.classList.add('hidden'); receiptTotalLabel.innerText = "預估成交總計"; }
             document.getElementById('receipt-final').innerText = `$ ${finalCalculatedTotal.toLocaleString()}`; document.getElementById('main-app').classList.add('hidden'); document.getElementById('summary-modal').style.display = 'none'; document.getElementById('receipt-view').classList.remove('hidden'); window.scrollTo(0,0);
         }
