@@ -157,7 +157,16 @@
             try {
                 const res = await fetch(url), text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2)), rows = json.table.rows;
-                allProducts = rows.map(row => ({ category: row.c[0]?.v || '其他', name: row.c[1]?.v || '', price: row.c[2]?.v || 0, desc: row.c[3]?.v || '', img: row.c[4]?.v || 'https://via.placeholder.com/150', status: row.c[5]?.v || '' }));
+                // 🛠️ 核心修正：增加 row.c[6]?.v 讀取 Google 試算表的第 G 欄（索引為 6）作為市場原價
+                allProducts = rows.map(row => ({ 
+                    category: row.c[0]?.v || '其他', 
+                    name: row.c[1]?.v || '', 
+                    price: row.c[2]?.v || 0, 
+                    desc: row.c[3]?.v || '', 
+                    img: row.c[4]?.v || 'https://via.placeholder.com/150', 
+                    status: row.c[5]?.v || '',
+                    marketPrice: row.c[6]?.v || null 
+                }));
                 const categories = [...new Set(allProducts.map(p => p.category))];
                 currentCategory = categories[0]; renderCategories(); filterProducts(currentCategory); restoreFormState(); 
             } catch (e) { console.error(e); }
@@ -214,14 +223,15 @@
             document.getElementById('category-nav').innerHTML = categories.map(cat => `<span onclick="filterProducts('${cat}')" class="px-5 py-2 cursor-pointer click-heavy rounded-full ${cat === currentCategory ? 'active-tab' : 'text-gray-400'}">${cat}</span>`).join('');
         }
 
-        // 🛠️ 核心：在首頁產品卡片上，渲染「劃線原價」與「藍色特惠價」的雙層結構
+        // 🛠️ 核心：讀取自訂的 G 欄原價，若有填寫則顯示劃線原價，沒填則乾淨隱藏
         function filterProducts(cat) {
             currentCategory = cat; renderCategories();
             const filtered = allProducts.filter(p => p.category === cat && p.status !== '隱藏');
             document.getElementById('product-list').innerHTML = filtered.map(item => {
-                // 自動防呆算計原價：汽車項目自動加35000元作為被劃線的原價，其餘週邊配件自動加價10%作為定價
-                const isCar = taxFreeCars.some(c => item.name.toUpperCase().includes(c)) || item.name.toUpperCase().includes("CARRY");
-                const originalMarketPrice = isCar ? (item.price + 35000) : Math.round(item.price * 1.1);
+                
+                // 檢查試算表 G 欄是否有填寫原價數值
+                const hasMarketPrice = item.marketPrice !== null && !isNaN(parseInt(item.marketPrice)) && parseInt(item.marketPrice) > 0;
+                const showMarketPriceHtml = hasMarketPrice ? `<span class="text-xs text-red-500 line-through font-bold opacity-80">$${parseInt(item.marketPrice).toLocaleString()}</span>` : `<span class="text-xs text-transparent select-none font-bold">──</span>`;
 
                 return `
                 <div class="bg-white rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col h-full active:scale-95 transition-transform duration-150">
@@ -229,8 +239,9 @@
                     <div class="p-4 flex-1 flex flex-col justify-between">
                         <div class="mb-3 text-center"><h3 class="font-black text-gray-900 text-sm leading-tight mb-1">${item.name}</h3><p class="text-[10px] text-gray-400 line-clamp-2">${item.desc}</p></div>
                         <div>
+                            <!-- 🌟 價格畫線升級操作區 -->
                             <div class="text-center mb-2">
-                                <span class="text-xs text-red-500 line-through font-bold opacity-80">$${originalMarketPrice.toLocaleString()}</span>
+                                ${showMarketPriceHtml}
                                 <p class="text-[#003399] font-black text-xl tracking-tighter mt-0.5">$${item.price.toLocaleString()}</p>
                             </div>
                             <button onclick="addToCart('${item.name}', ${item.price}, this, '${item.desc.replace(/'/g, "\\'")}')" class="w-full bg-[#E60012] text-white text-xs py-3 rounded-xl font-black click-heavy shadow-md">加入</button>
