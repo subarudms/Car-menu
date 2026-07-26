@@ -11,9 +11,9 @@
     <meta name="apple-mobile-web-app-title" content="SUZUKI選單">
     <meta name="theme-color" content="#003399">
 
-    <!-- Tailwind CSS & HTML2PDF 匯出引擎 -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root { --suzuki-red: #E60012; --suzuki-blue: #003399; }
@@ -52,7 +52,6 @@
 
     <div id="image-lightbox" onclick="this.style.display='none'"><img id="lightbox-img" class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform duration-300"></div>
 
-    <!-- 已選擇項目彈窗 -->
     <div id="summary-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end justify-center" style="display: none;">
         <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 max-h-[90vh] flex flex-col overflow-hidden text-sm shadow-2xl">
             <div class="flex justify-between items-center mb-2 border-b pb-3">
@@ -68,8 +67,8 @@
                         <input type="text" id="customer-name" oninput="saveFormState()" placeholder="請輸入姓名" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-gray-800">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-400 mb-1">聯繫電話 <span class="text-red-500">*</span></label>
-                        <input type="tel" id="customer-phone" oninput="saveFormState()" placeholder="請輸入電話(解鎖密碼)" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-gray-800">
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">聯繫電話 <span class="text-red-500">(PDF加密密碼)</span></label>
+                        <input type="tel" id="customer-phone" oninput="saveFormState()" placeholder="開檔密碼" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#003399] font-bold text-gray-800">
                     </div>
                 </div>
                 <div class="p-4 bg-blue-50/50 border border-blue-100/60 rounded-2xl space-y-3">
@@ -130,23 +129,9 @@
         </div>
     </div>
 
-    <!-- 🔐 電話安全驗證解鎖視窗 -->
-    <div id="unlock-modal" class="fixed inset-0 bg-black/90 z-[150] flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl">
-            <div class="w-12 h-12 bg-blue-100 text-[#003399] rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">🔐</div>
-            <h3 class="font-black text-gray-900 text-lg mb-1">車主專屬隱私驗證</h3>
-            <p class="text-xs text-gray-500 mb-4">請輸入車主聯繫電話（或後 4 碼）解鎖檢視專業報價單</p>
-            <input type="tel" id="unlock-phone-input" placeholder="請輸入電話號碼" class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-center text-sm font-bold focus:outline-none focus:border-[#003399] mb-4">
-            <button onclick="verifyUnlockPhone()" class="w-full bg-[#003399] text-white py-3 rounded-xl font-bold click-heavy text-sm shadow-md">驗證並開啟報價單</button>
-            <button onclick="cancelUnlock()" class="w-full bg-transparent text-gray-400 py-2 rounded-xl font-bold text-xs mt-1">返回修改</button>
-        </div>
-    </div>
-
-    <!-- 📄 正式商業報價單檢視區 (設計高質感與專業度) -->
     <div id="receipt-view" class="hidden fixed inset-0 bg-gray-50 z-[100] overflow-y-auto p-4 text-gray-900">
-        <div id="pdf-printable-area" class="max-w-md mx-auto receipt-shadow border border-gray-200 rounded-[1.5rem] overflow-hidden bg-white mt-2">
-            <!-- 正式抬頭 Header -->
-            <div class="bg-[#003399] text-white p-6 relative">
+        <div id="pdf-printable-area" class="max-w-md mx-auto receipt-shadow border border-gray-200 rounded-[1.5rem] overflow-hidden bg-white mt-2 p-6">
+            <div class="bg-[#003399] text-white -m-6 mb-4 p-6 relative">
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-black tracking-[0.2em] uppercase">TAIWAN SUZUKI</h2>
@@ -158,8 +143,7 @@
                 </div>
             </div>
 
-            <div class="p-6 text-left">
-                <!-- 車主與單號資訊區 -->
+            <div class="text-left pt-2">
                 <div class="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-4">
                     <div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">貴賓客戶 Customer</p>
@@ -172,7 +156,6 @@
                     </div>
                 </div>
                 
-                <!-- 明細表格 Table -->
                 <div class="mb-6">
                     <p class="text-xs font-black text-gray-900 mb-2 border-l-4 border-[#003399] pl-2">選購車型與精選配件項目</p>
                     <div class="border rounded-xl overflow-hidden">
@@ -188,7 +171,6 @@
                     </div>
                 </div>
                 
-                <!-- 費用試算摘要 -->
                 <div class="bg-gray-50 p-4 rounded-xl space-y-2.5 text-xs font-bold mb-6 border border-gray-100">
                     <div class="flex justify-between text-gray-500">
                         <span>車價與配件牌價總計</span>
@@ -228,10 +210,10 @@
                     </div>
                 </div>
                 
-                <!-- 正式條款與簽章備註 -->
                 <div class="border-t pt-3 space-y-1 text-[9px] text-gray-400 font-medium leading-relaxed">
                     <p>* 本報價單數據具時效性，領牌稅規費採當月按日精算，實際金額多退少補。</p>
                     <p>* 優惠方案與車輛配備以正式訂購合約書簽署規範內容為準。</p>
+                    <p class="text-[#003399] font-bold">* 本 PDF 檔案已加密保護，解鎖密碼為車主聯繫電話。</p>
                 </div>
 
                 <div class="mt-6 pt-4 border-t border-dashed flex justify-between items-end text-[10px] text-gray-500">
@@ -249,7 +231,7 @@
 
         <div class="max-w-md mx-auto mt-6 px-2 flex gap-3 pb-16">
             <button onclick="closeReceipt()" class="flex-1 bg-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold click-heavy text-sm">↩ 返回修改</button>
-            <button onclick="exportToPDF()" class="flex-1 bg-[#003399] text-white py-3.5 rounded-2xl font-black click-heavy shadow-lg text-sm flex items-center justify-center gap-1">📄 匯出 PDF 檔案</button>
+            <button onclick="exportToEncryptedPDF()" class="flex-1 bg-[#003399] text-white py-3.5 rounded-2xl font-black click-heavy shadow-lg text-sm flex items-center justify-center gap-1">🔒 匯出加密 PDF 檔案</button>
         </div>
     </div>
 
@@ -257,7 +239,6 @@
         const sheetID = '1-FY0lTyZhZfeMk4VGIjATYbWF16HAck2oLhxi1JD0rw';
         const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
         let allProducts = [], currentCategory = '', selectedItems = [], carCount = 0, autoTaxDiscount = 0, estimatedLicenseFee = 0, finalCalculatedTotal = 0, globalMonthlyPay = 0; 
-        let targetUnlockPhone = ""; 
         const taxFreeCars = ["SWIFT", "SCROSS", "VITARA", "JIMNY", "E-VITARA"];
 
         async function loadData() {
@@ -405,26 +386,19 @@
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
-        // 🛠️ 核心點擊修復 + 電話密碼鎖觸發
+        // 🌟 點擊即刻順暢生成正式報價單（無障礙不卡關）
         function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇購車車型或配件品項！");
-            
-            const cPhone = document.getElementById('customer-phone').value.trim();
-            if (!cPhone) {
-                alert("請先輸入『聯繫電話』，此電話將作為解鎖觀看報價單的安全密碼！");
-                document.getElementById('customer-phone').focus();
-                return;
-            }
-            targetUnlockPhone = cPhone;
 
-            // 準備報價單數據
+            const cPhone = document.getElementById('customer-phone').value.trim();
+            const cName = document.getElementById('customer-name').value.trim();
+            
             const totals = calculateFinalTotal(), now = new Date();
             document.getElementById('receipt-date').innerText = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             document.getElementById('receipt-no').innerText = Math.floor(Math.random()*9000) + 1000;
             
-            const cName = document.getElementById('customer-name').value.trim();
             document.getElementById('receipt-c-name').innerText = cName || "尊榮";
-            document.getElementById('receipt-c-phone').innerText = cPhone;
+            document.getElementById('receipt-c-phone').innerText = cPhone || "未提供";
 
             document.getElementById('receipt-items').innerHTML = selectedItems.map(item => `
                 <tr>
@@ -454,30 +428,11 @@
             
             document.getElementById('receipt-final').innerText = `$ ${finalCalculatedTotal.toLocaleString()}`;
 
-            // 🔐 彈出電話解鎖密碼框
-            document.getElementById('unlock-phone-input').value = "";
-            document.getElementById('unlock-modal').classList.remove('hidden');
-        }
-
-        // 🔐 驗證解鎖電話邏輯
-        function verifyUnlockPhone() {
-            const inputVal = document.getElementById('unlock-phone-input').value.trim();
-            if (!inputVal) return alert("請輸入電話號碼！");
-
-            // 比對是否符合完整電話或電話後4碼
-            if (inputVal === targetUnlockPhone || targetUnlockPhone.endsWith(inputVal)) {
-                document.getElementById('unlock-modal').classList.add('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-                document.getElementById('summary-modal').style.display = 'none';
-                document.getElementById('receipt-view').classList.remove('hidden');
-                window.scrollTo(0,0);
-            } else {
-                alert("❌ 電話號碼驗證失敗！請輸入與填寫資料一致的車主電話。");
-            }
-        }
-
-        function cancelUnlock() {
-            document.getElementById('unlock-modal').classList.add('hidden');
+            // 直接展示正式報價單
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('summary-modal').style.display = 'none';
+            document.getElementById('receipt-view').classList.remove('hidden');
+            window.scrollTo(0,0);
         }
 
         function closeReceipt() { 
@@ -485,18 +440,46 @@
             document.getElementById('receipt-view').classList.add('hidden'); 
         }
 
-        // 📄 匯出 PDF 功能引擎
-        function exportToPDF() {
+        // 🔒 匯出「加密 PDF 檔案」技術引擎：將電話號碼直接寫入 PDF 檔案結構的加密金鑰！
+        async function exportToEncryptedPDF() {
+            const cPhone = document.getElementById('customer-phone').value.trim();
+            if (!cPhone) {
+                alert("請先返回輸入『聯繫電話』！此電話號碼將作為保護 PDF 檔案的唯一解鎖密碼。");
+                return;
+            }
+
             const element = document.getElementById('pdf-printable-area');
             const cName = document.getElementById('customer-name').value.trim() || "客戶";
-            const opt = {
-                margin:       [10, 10, 10, 10],
-                filename:     `SUZUKI_購車報價單_${cName}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
+
+            try {
+                // 1. 抓取畫面為超高解析度 Canvas 畫布
+                const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+                // 2. 初始化 jsPDF 並注入『原生 PDF 檔案加密密碼』
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    encryption: {
+                        userPassword: cPhone, // 🔑 客人打開 PDF 檔案時必須輸入此電話密碼！
+                        ownerPassword: cPhone + "_admin",
+                        userPermissions: ["print", "copy"]
+                    }
+                });
+
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.addImage(imgData, 'JPEG', 0, 10, pdfWidth, pdfHeight);
+                pdf.save(`SUZUKI_購車報價單_${cName}.pdf`);
+
+                alert(`🎉 報價單 PDF 已成功加密下載！\n\n🔑 開啟檔案密碼為車主電話：${cPhone}`);
+            } catch (err) {
+                alert("匯出 PDF 時發生錯誤：" + err.message);
+            }
         }
 
         function toggleModal(show) { document.getElementById('summary-modal').style.display = show ? 'flex' : 'none'; if(show) updateCartUI(); }
