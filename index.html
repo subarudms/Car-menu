@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="SUZUKI選單">
     <meta name="theme-color" content="#003399">
 
+    <!-- Tailwind CSS & html2canvas + jsPDF 加密匯出引擎 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -52,6 +53,7 @@
 
     <div id="image-lightbox" onclick="this.style.display='none'"><img id="lightbox-img" class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform duration-300"></div>
 
+    <!-- 已選擇項目彈窗 -->
     <div id="summary-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end justify-center" style="display: none;">
         <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 max-h-[90vh] flex flex-col overflow-hidden text-sm shadow-2xl">
             <div class="flex justify-between items-center mb-2 border-b pb-3">
@@ -129,8 +131,10 @@
         </div>
     </div>
 
+    <!-- 📄 正式商業報價單檢視區 (高質感與專業度) -->
     <div id="receipt-view" class="hidden fixed inset-0 bg-gray-50 z-[100] overflow-y-auto p-4 text-gray-900">
         <div id="pdf-printable-area" class="max-w-md mx-auto receipt-shadow border border-gray-200 rounded-[1.5rem] overflow-hidden bg-white mt-2 p-6">
+            <!-- 正式抬頭 Header -->
             <div class="bg-[#003399] text-white -m-6 mb-4 p-6 relative">
                 <div class="flex justify-between items-center">
                     <div>
@@ -144,6 +148,7 @@
             </div>
 
             <div class="text-left pt-2">
+                <!-- 車主與單號資訊區 -->
                 <div class="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-4">
                     <div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">貴賓客戶 Customer</p>
@@ -156,7 +161,8 @@
                     </div>
                 </div>
                 
-                <div class="mb-6">
+                <!-- 明細表格 Table -->
+                <div class="mb-4">
                     <p class="text-xs font-black text-gray-900 mb-2 border-l-4 border-[#003399] pl-2">選購車型與精選配件項目</p>
                     <div class="border rounded-xl overflow-hidden">
                         <table class="w-full text-xs text-left">
@@ -171,7 +177,8 @@
                     </div>
                 </div>
                 
-                <div class="bg-gray-50 p-4 rounded-xl space-y-2.5 text-xs font-bold mb-6 border border-gray-100">
+                <!-- 費用試算摘要 -->
+                <div class="bg-gray-50 p-4 rounded-xl space-y-2 text-xs font-bold mb-4 border border-gray-100">
                     <div class="flex justify-between text-gray-500">
                         <span>車價與配件牌價總計</span>
                         <span id="receipt-original">$ 0</span>
@@ -189,14 +196,14 @@
                     
                     <div id="receipt-tax-row" class="flex flex-col space-y-1 hidden"></div>
 
-                    <div id="receipt-discount-row" class="flex justify-between text-red-600 hidden bg-red-50 p-2 rounded-lg">
-                        <span>精裝車專案優惠折讓</span>
+                    <div id="receipt-discount-row" class="flex justify-between text-red-600 hidden bg-red-50 p-1.5 rounded-lg">
+                        <span>經裝車專案優惠折讓</span>
                         <span id="receipt-discount">- $ 0</span>
                     </div>
 
-                    <div id="receipt-subsidy-row" class="flex justify-between text-blue-600 hidden bg-blue-50 p-2 rounded-lg"><span>專案貸款衍生補貼息</span><span id="receipt-subsidy-total">+ $ 0</span></div>
+                    <div id="receipt-subsidy-row" class="flex justify-between text-blue-600 hidden bg-blue-50 p-1.5 rounded-lg"><span>專案貸款衍生補貼息</span><span id="receipt-subsidy-total">+ $ 0</span></div>
 
-                    <div id="receipt-loan-row" class="flex justify-between text-amber-700 hidden bg-amber-50 p-2 rounded-lg">
+                    <div id="receipt-loan-row" class="flex justify-between text-amber-700 hidden bg-amber-50 p-1.5 rounded-lg">
                         <div class="text-left">
                             <span>專案分期銀行貸款 (<span id="receipt-loan-period"></span>期)</span>
                             <p class="text-[10px] text-emerald-600 font-bold" id="receipt-monthly-pay-note"></p>
@@ -204,26 +211,27 @@
                         <span id="receipt-loan-total">- $ 0</span>
                     </div>
 
-                    <div class="flex justify-between items-baseline pt-3 border-t-2 border-gray-900 text-gray-900">
+                    <div class="flex justify-between items-baseline pt-2.5 border-t-2 border-gray-900 text-gray-900">
                         <span class="text-sm font-black" id="receipt-total-label">預估成交總金額</span>
                         <span class="text-2xl font-black text-[#003399] tracking-tight" id="receipt-final">$ 0</span>
                     </div>
                 </div>
                 
-                <div class="border-t pt-3 space-y-1 text-[9px] text-gray-400 font-medium leading-relaxed">
+                <!-- 正式條款與簽章備註 -->
+                <div class="border-t pt-2 space-y-0.5 text-[9px] text-gray-400 font-medium leading-relaxed">
                     <p>* 本報價單數據具時效性，領牌稅規費採當月按日精算，實際金額多退少補。</p>
                     <p>* 優惠方案與車輛配備以正式訂購合約書簽署規範內容為準。</p>
                     <p class="text-[#003399] font-bold">* 本 PDF 檔案已加密保護，解鎖密碼為車主聯繫電話。</p>
                 </div>
 
-                <div class="mt-6 pt-4 border-t border-dashed flex justify-between items-end text-[10px] text-gray-500">
+                <div class="mt-4 pt-3 border-t border-dashed flex justify-between items-end text-[10px] text-gray-500">
                     <div>
                         <p class="font-bold text-gray-800">SUZUKI 汽車授權銷售代表</p>
-                        <p class="mt-4 border-b border-gray-400 w-28"></p>
+                        <p class="mt-3 border-b border-gray-400 w-28"></p>
                     </div>
                     <div>
                         <p class="font-bold text-gray-800">客戶簽名確認</p>
-                        <p class="mt-4 border-b border-gray-400 w-28"></p>
+                        <p class="mt-3 border-b border-gray-400 w-28"></p>
                     </div>
                 </div>
             </div>
@@ -386,7 +394,6 @@
             return { baseTotal, manualDiscount, insAmount, loanAmount, mvFee, subsidyInterest, grandTotal };
         }
 
-        // 🌟 點擊即刻順暢生成正式報價單（無障礙不卡關）
         function generateReceipt() {
             if (selectedItems.length === 0) return alert("請先選擇購車車型或配件品項！");
 
@@ -402,8 +409,8 @@
 
             document.getElementById('receipt-items').innerHTML = selectedItems.map(item => `
                 <tr>
-                    <td class="p-2.5 font-bold text-gray-800">${item.name}</td>
-                    <td class="p-2.5 text-right font-black text-gray-900">$${item.price.toLocaleString()}</td>
+                    <td class="p-2 font-bold text-gray-800">${item.name}</td>
+                    <td class="p-2 text-right font-black text-gray-900">$${item.price.toLocaleString()}</td>
                 </tr>`).join('');
             
             document.getElementById('receipt-original').innerText = `$ ${totals.baseTotal.toLocaleString()}`;
@@ -415,7 +422,7 @@
             if (totalLicenseAndMv > 0) { receiptLicenseRow.classList.remove('hidden'); document.getElementById('receipt-mv-tag').innerText = totals.mvFee > 0 ? " (含動保費)" : ""; document.getElementById('receipt-license-total').innerText = `+ $ ${totalLicenseAndMv.toLocaleString()}`; } else { receiptLicenseRow.classList.add('hidden'); }
             
             const taxRow = document.getElementById('receipt-tax-row');
-            if(autoTaxDiscount > 0) { taxRow.classList.remove('hidden'); taxRow.innerHTML = `<div class="flex justify-between text-[#003399] font-black bg-blue-50 p-2 rounded-lg"><span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span><span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span></div><p class="text-[9px] text-blue-400 text-right font-medium italic mt-1">* 需先入車款三個月後匯入車主帳戶</p>`; } else { taxRow.classList.add('hidden'); }
+            if(autoTaxDiscount > 0) { taxRow.classList.remove('hidden'); taxRow.innerHTML = `<div class="flex justify-between text-[#003399] font-black bg-blue-50 p-1.5 rounded-lg"><span>新購車貨物稅補助 ${carCount > 1 ? `(${carCount}台)` : ""}</span><span id="receipt-tax-total">- $ ${autoTaxDiscount.toLocaleString()}</span></div><p class="text-[9px] text-blue-400 text-right font-medium italic mt-0.5">* 需先入車款三個月後匯入車主帳戶</p>`; } else { taxRow.classList.add('hidden'); }
             
             if (totals.subsidyInterest > 0) { document.getElementById('receipt-subsidy-row').classList.remove('hidden'); document.getElementById('receipt-subsidy-total').innerText = `+ $ ${totals.subsidyInterest.toLocaleString()}`; } else { document.getElementById('receipt-subsidy-row').classList.add('hidden'); }
             
@@ -428,7 +435,6 @@
             
             document.getElementById('receipt-final').innerText = `$ ${finalCalculatedTotal.toLocaleString()}`;
 
-            // 直接展示正式報價單
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('summary-modal').style.display = 'none';
             document.getElementById('receipt-view').classList.remove('hidden');
@@ -440,7 +446,7 @@
             document.getElementById('receipt-view').classList.add('hidden'); 
         }
 
-        // 🔒 匯出「加密 PDF 檔案」技術引擎：將電話號碼直接寫入 PDF 檔案結構的加密金鑰！
+        // 🌟 核心修復引擎：A4 自動比例精算 + 100% 完整壓進單頁 PDF
         async function exportToEncryptedPDF() {
             const cPhone = document.getElementById('customer-phone').value.trim();
             if (!cPhone) {
@@ -452,31 +458,49 @@
             const cName = document.getElementById('customer-name').value.trim() || "客戶";
 
             try {
-                // 1. 抓取畫面為超高解析度 Canvas 畫布
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                // 1. 轉為高畫質 Canvas 畫布
+                const canvas = await html2canvas(element, { 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false
+                });
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
-                // 2. 初始化 jsPDF 並注入『原生 PDF 檔案加密密碼』
+                // 2. 初始化 jsPDF 與原生解鎖密碼
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
                     format: 'a4',
                     encryption: {
-                        userPassword: cPhone, // 🔑 客人打開 PDF 檔案時必須輸入此電話密碼！
+                        userPassword: cPhone,
                         ownerPassword: cPhone + "_admin",
                         userPermissions: ["print", "copy"]
                     }
                 });
 
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                // 3. 📐 核心精算：計算 A4 可列印範圍（扣除邊距）
+                const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+                const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+                const margin = 8; // 邊距 8mm
+                const maxWidth = pdfWidth - (margin * 2); // 194mm
+                const maxHeight = pdfHeight - (margin * 2); // 281mm
 
-                pdf.addImage(imgData, 'JPEG', 0, 10, pdfWidth, pdfHeight);
+                let printWidth = maxWidth;
+                let printHeight = (canvas.height * printWidth) / canvas.width;
+
+                // 🌟 當總高度大於 A4 頁面上限時，自動啟動「等比完全擠進單頁」邏輯，確保底部絕對不被裁切！
+                if (printHeight > maxHeight) {
+                    printHeight = maxHeight;
+                    printWidth = (canvas.width * printHeight) / canvas.height;
+                }
+
+                const xPos = (pdfWidth - printWidth) / 2; // 水平置中
+
+                pdf.addImage(imgData, 'JPEG', xPos, margin, printWidth, printHeight);
                 pdf.save(`SUZUKI_購車報價單_${cName}.pdf`);
 
-                alert(`🎉 報價單 PDF 已成功加密下載！\n\n🔑 開啟檔案密碼為車主電話：${cPhone}`);
+                alert(`🎉 報價單 PDF 已成功加密下載！\n\n🔑 開開檔案密碼為車主電話：${cPhone}`);
             } catch (err) {
                 alert("匯出 PDF 時發生錯誤：" + err.message);
             }
